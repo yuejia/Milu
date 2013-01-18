@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Utility.h"
 #include "ASTPrinter.h"
 #include "ASTNode.h"
+#include <glib.h>
 
 int main(int argc, char *argv[ ] ) {
 
@@ -41,7 +42,7 @@ int main(int argc, char *argv[ ] ) {
 	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Higher Order Mutation Testing System v3.0") : 0;
 
 	milu_options_get_tag_list_path();
-    if (argc < 1)
+    if (argc < 1 || argv[1] == NULL)
     {
         g_log ("Milu",G_LOG_LEVEL_ERROR,"Usage: milu source_path ");
     }

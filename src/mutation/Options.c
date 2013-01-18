@@ -28,6 +28,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Options.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <glib.h>
 
 gboolean MILU_GLOBAL_VERBOSE = FALSE;
 static gint MP_NUM = -1;

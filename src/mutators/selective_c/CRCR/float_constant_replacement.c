@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Mutator.h"
 #include "ASTNodeUtil.h"
+#include <glib.h>
 
 static gboolean mutator_milu_float_constant_replacement_node_checking(ASTNode *);
 static gboolean mutator_milu_float_constant_replacement_clean(ASTNode * node, gint type);
@@ -75,7 +76,7 @@ static gboolean mutator_milu_float_constant_replacement_mutate(ASTNode * node, g
 			set_ASTNode_text (node, g_strdup_printf("%f", atof(node->text) - 0.1));
 			return TRUE;
 		case 6:
-			set_ASTNode_text (node, g_strdup_printf("%f", atoi(node->text) * -1));
+			set_ASTNode_text (node, g_strdup_printf("%f", atoi(node->text) * -1.0));
 			return TRUE;
 		default:
 			break;
