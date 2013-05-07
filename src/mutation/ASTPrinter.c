@@ -955,6 +955,7 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
 		case NodeKind_CStyleCastExpr:
 		case NodeKind_CompoundStmt:
 		case NodeKind_BreakStmt:
+		case NodeKind_GotoStmt:
 		{
             if(!is_else)
             {
@@ -1017,6 +1018,13 @@ static void	print_source_unexposed_expr(ASTNode * parent, GString * buffer)
 {
     html_check_mutantion_node(parent);
 	ASTNode * node = parent->children;
+	if (node->text[0]=='s' && node->text[1]=='i' && node->text[5]=='f')
+	{
+		//fix duplication of sizeof
+		 print_source_expr(node, buffer, 0);
+	}
+	else
+	{
 	while(node)
 	{
         print_source_expr(node, buffer, 0);
@@ -1046,6 +1054,7 @@ static void	print_source_unexposed_expr(ASTNode * parent, GString * buffer)
 
 		//}
 		node = node->next_sibling;
+	}
 	}
 }
 
@@ -1614,14 +1623,13 @@ static void print_source_member_ref_expr(ASTNode * parent, GString * buffer)
    html_check_mutantion_node(parent);
    ASTNode * node = parent->children;
 
-   gboolean dot = ASTNode_check_ext_3(node);
+   gboolean dot = ASTNode_check_ext_3(parent);
 
    while(node)
    {
 	     print_source_expr(node, buffer, 0);
          node= node->next_sibling;
    }
-
 
    if(dot)
    g_string_append_printf(buffer,". %s ", parent->text);

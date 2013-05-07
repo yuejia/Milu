@@ -51,9 +51,9 @@ void ASTNodeTypeKindNames_init()
 	 ASTNodeTypeKindNames[5] =  "unsigned char";
 	 ASTNodeTypeKindNames[6] =  "char16";
 	 ASTNodeTypeKindNames[7] =  "char32";
-	 ASTNodeTypeKindNames[8] =   "ushort";
-	 ASTNodeTypeKindNames[9] =  "uint";
-	 ASTNodeTypeKindNames[10] =  "ulong";
+	 ASTNodeTypeKindNames[8] =   "unsigned short";
+	 ASTNodeTypeKindNames[9] =  "unsigned int";
+	 ASTNodeTypeKindNames[10] =  "unsigned long";
 	 ASTNodeTypeKindNames[11] =  "ulonglong";
 	 ASTNodeTypeKindNames[12] =   "uint128";
 	 ASTNodeTypeKindNames[13] =  "char";//"Char_S";

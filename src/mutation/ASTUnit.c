@@ -101,11 +101,13 @@ ASTUnit * ASTUnit_new(const gchar * src_path)
 	parse_tree_node_clean(au->ast);
 
 	parse_tree_fix_functions(au->ast);
+
 	if(!PARSING_UNITTESTS)
 	{
-	parse_tree_fix_header(src_path, au->ast);
-ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} \n");
-	ASTNode_insert_before(au->ast->children, af);
+	add_original_non_mutation(au->ast);
+//	parse_tree_fix_header(src_path, au->ast); //no need , will be removed
+//ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} \n"); //no need , will be removed
+//	ASTNode_insert_before(au->ast->children, af);//no need , will be removed
 	}
 
 
@@ -266,8 +268,8 @@ static void libclang_parse_file(ASTUnit* au, int argc, char *argv[ ] )
 
     fix_function_attribute();
     clean_ast(ast);
-	if(!PARSING_UNITTESTS)
-    add_original_non_mutation(ast);
+//	if(!PARSING_UNITTESTS)
+//    add_original_non_mutation(ast);
 
 	clang_disposeTranslationUnit(TU);
 	clang_disposeIndex(Index);
@@ -407,7 +409,9 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
                 || g_strcmp0(curr_text,"-=") == 0
                 || g_strcmp0(curr_text,"*=") == 0
                 || g_strcmp0(curr_text,"/=") == 0
-                || g_strcmp0(curr_text,"%=") == 0)
+                || g_strcmp0(curr_text,"%=") == 0
+                || g_strcmp0(curr_text,"^=") == 0
+                || g_strcmp0(curr_text,"&=") == 0)
             // printf("%s ", clang_getCString( clang_getTokenSpelling(*CurrTU,tokens[i])));
 		    {
             	ASTNode_set_text(node , curr_text);
@@ -742,12 +746,13 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		unsigned tokens_num = 0;
 		clang_tokenize	((*CurrTU), ran, &tokens, &tokens_num);
 
-		CXString token_cstri = clang_getTokenSpelling(*CurrTU,tokens[tokens_num - 1]);
+		CXString token_cstri = clang_getTokenSpelling(*CurrTU,tokens[tokens_num - 3]);
 		const char * curr_tokeni = clang_getCString(token_cstri);
 		if(g_strcmp0(curr_tokeni, ".") == 0)
 		{
 			ASTNode_set_ext_3(node, TRUE);
 		}
+
 		clang_disposeString(token_cstri);
 		clang_disposeTokens(&CurrTU, tokens, tokens_num);
 
@@ -955,6 +960,16 @@ static gint check_binary_op(const char * op)
 	if (g_strcmp0(op, "||") == 0)
 		return 14;
 
+	if (g_strcmp0(op, "&") == 0)
+		return 10;
+	if (g_strcmp0(op, "^") == 0)
+		return 11;
+
+	if (g_strcmp0(op, ">>") == 0)
+		return 7;
+	if (g_strcmp0(op, "<<") == 0)
+		return 7;
+
 	if (g_strcmp0(op,">") ==0 ||
 			g_strcmp0(op,">=") ==0 ||
 			g_strcmp0(op,"<") ==0 ||
@@ -966,7 +981,6 @@ static gint check_binary_op(const char * op)
 			g_strcmp0(op,"!=") ==0
 	)
 		return 9;
-
 
 
 	return 0;
@@ -1117,6 +1131,8 @@ static void add_original_non_mutation(ASTNode * ast)
     int i = 0 ;
 	while(child)
 	{
+		//printf("c: %s", child->text);
+		//fflush(stdout);
 		if(child->line_start > curr_line)
 		{
 			g_string_printf(buffer,"");
