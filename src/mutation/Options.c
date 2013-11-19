@@ -299,6 +299,10 @@ gboolean milu_options_get_html_save_all()
 	return MILU_HTML_SAVE_ALL_MUT;
 }
 
+void milu_options_set_html_save_all()
+{
+	MILU_HTML_SAVE_ALL_MUT = TRUE;
+}
 
 gboolean milu_options_print_killing_result()
 {

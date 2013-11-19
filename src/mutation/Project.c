@@ -281,11 +281,13 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 			"<body>");
 
 	// printmut source path
+	if(!milu_project_is_executable(project))
+		milu_options_set_html_save_all();
 	for(gint i = 0 ; i< mutants->len ; i++)
 	{
 		Mutant * curr_mut = g_ptr_array_index(mutants, i);
 
-		if (!milu_project_is_executable(project) || milu_options_get_html_save_all() )
+		if (milu_options_get_html_save_all() )
 		{
 			mutant_save_html(curr_mut);
 			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());

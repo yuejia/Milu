@@ -196,6 +196,12 @@ void milu_options_set_src_path(gchar * path);
  **/
 gchar * milu_options_get_src_path();
 
+/**
+ * \brief Set true for generate html viewer for all mutants.
+ **/
+
+void milu_options_set_html_save_all();
+
 #endif /* MENU_H_ */
 
 /**@}*/
