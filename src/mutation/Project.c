@@ -165,9 +165,9 @@ void milu_project_print(const Project * project, PrintMode mode, FILE * output)
     	}
     	default:
     	{
-    		g_fprintf(output, "Milu Project:\n");
-    		g_fprintf(output, "\tMutation Operators: %d\n", project->mutation_operators->len);
-    		g_fprintf(output, "\tMutation Locations: %d\n", project->mutation_locations->len);
+    		fprintf(output, "Milu Project:\n");
+    		fprintf(output, "\tMutation Operators: %d\n", project->mutation_operators->len);
+    		fprintf(output, "\tMutation Locations: %d\n", project->mutation_locations->len);
     		break;
     	}
     }
@@ -249,7 +249,8 @@ void milu_project_save_mid(Project * project, GPtrArray * mutants)
     	mutation_id_print(m->id, findex);
     	fprintf(findex, "%s", "\n");
     }
-    fclose(findex);
+    fclose(findex);	
+    g_string_free(cmd, TRUE);
 }
 
 void milu_project_save_html_output(Project * project, GPtrArray * mutants)
@@ -260,17 +261,19 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 
 	g_string_printf(cmd, "%s/html/index.html", project->output_path);
 
-    FILE * findex = fopen(cmd->str,"w");
-	g_fprintf(findex, "<html><frameset cols=\"25%%,75%%\">"
+	FILE * findex = fopen(cmd->str,"w");
+	fprintf(findex, "<html><frameset cols=\"25%%,75%%\">"
 			"<frame name=\"mut_list\" src=\"mut_list.html\" />"
-	  "<frame name=\"mut_code\" src=\"\" /></frameset></html>");
-    fclose(findex);
+			"<frame name=\"mut_code\" src=\"\" /></frameset></html>");
+	fclose(findex);
 
 
 	g_string_printf(cmd, "%s/html/mut_list.html", project->output_path);
 
-    FILE * fmut_list = fopen(cmd->str,"w");
-	g_fprintf(findex, "<html>"
+
+	FILE * fmut_list = fopen(cmd->str,"w");
+
+	fprintf(fmut_list, "<html>"
 			"<head>"
 			"<title>Mutant List</title>"
 			"<base target=\"mut_code\">"
@@ -278,24 +281,30 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 			"<body>");
 
 	// printmut source path
-    for(gint i = 0 ; i< mutants->len ; i++)
-    {
-        Mutant * curr_mut = g_ptr_array_index(mutants, i);
+	for(gint i = 0 ; i< mutants->len ; i++)
+	{
+		Mutant * curr_mut = g_ptr_array_index(mutants, i);
 
-        //TODO ucomment this one for making this  save non killing mutants
-   //     if(!mutant_is_killed(curr_mut))
-        if(milu_options_get_html_save_all() || !mutant_is_killed(curr_mut))
-        {
+		if (!milu_project_is_executable(project) || milu_options_get_html_save_all() )
+		{
+			mutant_save_html(curr_mut);
+			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
+			fprintf(fmut_list, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
+		}
+		else
+		{
+		if(!mutant_is_killed(curr_mut))
+		{
+			mutant_save_html(curr_mut);
+			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
+			fprintf(fmut_list, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
+		}
+		}
 
-        mutant_save_html(curr_mut);
-        gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
-	    g_fprintf(findex, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
-        }
-    }
-
-    g_fprintf(findex,"</body>"
+	}
+	fprintf(fmut_list,"</body>" 
 			"</html>");
-    fclose(fmut_list);
-
+	fclose(fmut_list);
 	g_string_free(cmd, TRUE);
+
 }

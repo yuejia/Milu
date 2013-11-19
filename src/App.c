@@ -135,7 +135,7 @@ int main(int argc, char *argv[ ] ) {
 		if(milu_options_save_killing_result())
 		{
 			GString * cmd = g_string_new("");
-		    g_string_printf(cmd, "%s/results.txt", project->output_path);
+ 		    g_string_printf(cmd, "%s/results.txt", project->output_path);
 			FILE * f = fopen(cmd->str,"w");
 			milu_print_killing_results(project, mutants, f);
 			fclose(f);
@@ -146,6 +146,8 @@ int main(int argc, char *argv[ ] ) {
 
     if(milu_options_get_html_view() &&  !milu_options_not_save_mutants())
     {
+	// generate html files for mutants
+	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Generate html viewer for mutants") : 0;
         milu_project_save_html_output(project, mutants);
     }
 
