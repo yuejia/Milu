@@ -15,7 +15,15 @@ Yue Jia and Mark Harman. Milu: A Customizable, Runtime-Optimized Higher
 Order Mutation Testing Tool for the Full C Language TAIC PART'08,
 Windsor, UK, 29th-31st August 2008.
 
-## Get Source Code git clone https://github.com/yuejia/Milu 
+## Get Source Code 
+
+git clone https://github.com/yuejia/Milu 
+
+## Compilation in Ubuntu
+
+sudo apt-get install build-essential libglib2.0-dev llvm libclang-dev 
+cd Milu
+make
 
 ## Acknowledgement
 

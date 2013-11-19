@@ -1,10 +1,10 @@
 CC=gcc
 
 #User settings
-GLIBFLAGS=`/opt/local/bin/pkg-config --cflags glib-2.0`
+GLIBFLAGS=`/usr/bin/pkg-config --cflags glib-2.0`
 CLANGFLAGS=-I./src/include/clang-c
-GLIBLIB=`/opt/local/bin/pkg-config --libs glib-2.0`
-CLANGLIB= -lclang `/Users/yuejia/Documents/Projects/Milu3/llvm/Debug+Asserts/bin/llvm-config --ldflags`
+GLIBLIB=`/usr/bin/pkg-config --libs glib-2.0`
+CLANGLIB= -lclang `/usr/bin/llvm-config --ldflags`
 
 CFLAGS= $(GLIBFLAGS)  $(CLANGFLAGS)  -std=c99 -c -I./src/include
 CLIBS= $(CLANGLIB) $(GLIBLIB)
@@ -20,7 +20,7 @@ OPOBJ=Austin_CRCR.o Austin_OAAN.o Austin_OLLN.o Austin_OLNG.o Austin_ORRN.o CRCR
 all : init milu clean 
 
 milu : $(OBJECTS) 
-	$(CC) $(CLIBS) $(OBJECTS) -o bin/milu -O2
+	$(CC) $(OBJECTS) -o bin/milu -O2 $(CLIBS) 
 
 %.o : src/%.c 
 	$(CC) $(CFLAGS) $< -o $@
