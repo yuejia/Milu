@@ -747,17 +747,18 @@ ASTNode * ASTNode_deep_copy(ASTNode * node, gboolean copy_child)
 
 }
 */
+
 ASTNode * ASTNode_shallow_copy(ASTNode * node, gboolean copy_child)
 {
-    ASTNode * copy = ASTNode_new(node->kind, node->text, node->cx);
-    ASTNode * child = node->children;
-    while(child && copy_child)
-    {
-    	ASTNode_append_child(copy,ASTNode_shallow_copy( child, copy_child));
-        child = child->next_sibling;
-    }
+	ASTNode * copy = ASTNode_new(node->kind, node->text, node->cx);
+	ASTNode * child = node->children;
+	while(child && copy_child)
+	{
+		ASTNode_append_child(copy,ASTNode_shallow_copy( child, copy_child));
+		child = child->next_sibling;
+	}
 
-    return copy;
+	return copy;
 }
 
 void parse_tree_node_transform(ASTNode * node)
@@ -800,71 +801,65 @@ void parse_tree_node_transform(ASTNode * node)
 	else
 	{
 		if(node->kind == NodeKind_IfStmt)
+		{
+
+			ASTNode * el = node->children->next_sibling->next_sibling;
+			if(el)
 			{
-
-				ASTNode * el = node->children->next_sibling->next_sibling;
-				if(el)
+				if(el->kind != NodeKind_CompoundStmt)
 				{
-					if(el->kind != NodeKind_CompoundStmt)
-					{
-						ASTNode_unlink(el);
-						ASTNode * cp_node = ASTNode_new(NodeKind_CompoundStmt, "",NULL);
-						node->children->next_sibling->next_sibling = cp_node;
-						cp_node->prev_sibling = node->children->next_sibling;
-						cp_node->parent = node;
-						cp_node->children = el;
+					ASTNode_unlink(el);
+					ASTNode * cp_node = ASTNode_new(NodeKind_CompoundStmt, "",NULL);
+					node->children->next_sibling->next_sibling = cp_node;
+					cp_node->prev_sibling = node->children->next_sibling;
+					cp_node->parent = node;
+					cp_node->children = el;
 
-						el->parent = cp_node;
-						el->prev_sibling = NULL;
-						el->next_sibling = NULL;
-					}
+					el->parent = cp_node;
+					el->prev_sibling = NULL;
+					el->next_sibling = NULL;
 				}
-
 			}
+
+		}
 	}
 
 }
 
+/** Clean the redundent node in libclang AST to save more space. 
+    This is libclang dependent.*/
 void parse_tree_node_clean(ASTNode * node)
 {
 	if (node->children)
 	{
 		ASTNode * child;
-
-		// do node
 		if(node->kind == NodeKind_FloatingLiteral)
 		{
 			if(node->children)
-					{
+			{
 				if(node->children->kind == NodeKind_MiluSourceFloat && node->children->next_sibling == NULL)
 				{
-							ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
-							new_node->kind = NodeKind_FloatingLiteral;
+					ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
+					new_node->kind = NodeKind_FloatingLiteral;
 					ASTNode_replace(node, new_node);
-				//	 ASTNode_free(node);
-					 return ;
-					 //TODO: FREE
-
+					//TODO: FREE the original nodes whichs are shallow copied
+					return ;
 				}
-					}
-
+			}
 		}
 		if(node->kind == NodeKind_IntegerLiteral)
 		{
 			if(node->children)
-					{
+			{
 				if(node->children->kind == NodeKind_MiluSourceInteger && node->children->next_sibling == NULL)
 				{
-							ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
-							new_node->kind = NodeKind_IntegerLiteral;
+					ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
+					new_node->kind = NodeKind_IntegerLiteral;
 					ASTNode_replace(node, new_node);
-				//	 ASTNode_free(node);
-					 return ;
-					 //TODO: FREE
-
+					//TODO: FREE the original nodes whichs are shallow copied
+					return ;
 				}
-					}
-
+			}
 		}
 		if(node->kind == NodeKind_UnexposedExpr)
 		{
@@ -874,8 +869,8 @@ void parse_tree_node_clean(ASTNode * node)
 				{
 					ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
 					ASTNode_replace(node, new_node);
-				//	 ASTNode_free(node);
-					 return ;
+					//TODO: FREE the original nodes whichs are shallow copied
+					return ;
 				}
 			}
 		}
@@ -890,36 +885,31 @@ void parse_tree_node_clean(ASTNode * node)
 	}
 	else
 	{
-
 		if(node->kind == NodeKind_IntegerLiteral)
 		{
-				if(node->children->kind == NodeKind_MiluSourceInteger && node->children->next_sibling == NULL)
+			if(node->children->kind == NodeKind_MiluSourceInteger && node->children->next_sibling == NULL)
+			{
+				ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
+				new_node->kind = NodeKind_IntegerLiteral;
+				ASTNode_replace(node, new_node);
+				//TODO: FREE the original nodes whichs are shallow copied
+				return ;
+			}
+		}
+		if(node->kind == NodeKind_UnexposedExpr)
+		{
+			if(node->children)
+			{
+				if(node->children->kind == NodeKind_DeclRefExpr && node->children->next_sibling == NULL)
 				{
 					ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
-					new_node->kind = NodeKind_IntegerLiteral;
 					ASTNode_replace(node, new_node);
-				//	 ASTNode_free(node);
-					 return ;
-				}
-
-		}
-
-		if(node->kind == NodeKind_UnexposedExpr)
-			{
-				if(node->children)
-				{
-					if(node->children->kind == NodeKind_DeclRefExpr && node->children->next_sibling == NULL)
-					{
-						ASTNode * new_node = ASTNode_shallow_copy(node->children,FALSE);
-						ASTNode_replace(node, new_node);
-				//	 ASTNode_free(node);
-						 return ;
-					}
+				    //TODO: FREE the original nodes whichs are shallow copied
+					return ;
 				}
 			}
-
+		}
 	}
-
 }
 
 

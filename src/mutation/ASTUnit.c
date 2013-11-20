@@ -77,7 +77,9 @@ static gboolean fix_function_pointer(ASTNode * func);
 static gchar * reset_function_text(ASTNode * func);
 
 static void parse_tree_fix_header(gchar * src_path, ASTNode * root);
-static void parse_tree_fix_functions(ASTNode * func);
+
+//TODO: remove the tag system
+//static void parse_tree_fix_functions(ASTNode * func);
 
 extern gboolean MILU_AUSTIN_TRANSFORM ;
 // Public function implementation
@@ -85,42 +87,35 @@ extern gboolean MILU_AUSTIN_TRANSFORM ;
 ASTUnit * ASTUnit_new(const gchar * src_path)
 {
 	g_assert(src_path != NULL);
-
 	ASTUnit * au =  g_slice_new0 (ASTUnit);
 	CurrASTUnit = au;
 	gint argc = 1;
 	gchar * argv[1];
 	argv[0] = src_path;
-
 	au->file_path = g_string_chunk_insert (MiluStringPool, src_path);
 	au->file_name = g_string_chunk_insert(MiluStringPool, g_path_get_basename (src_path));
-
 	load_c_source_file(src_path);
 	libclang_parse_file(au, argc, argv);
-
 	parse_tree_node_clean(au->ast);
 
-	parse_tree_fix_functions(au->ast);
+// TODO:remove the old tag system
+//	parse_tree_fix_functions(au->ast);
 
-	if(!PARSING_UNITTESTS)
-	{
-	add_original_non_mutation(au->ast);
-//	parse_tree_fix_header(src_path, au->ast); //no need , will be removed
-//ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} \n"); //no need , will be removed
-//	ASTNode_insert_before(au->ast->children, af);//no need , will be removed
-	}
-
-
-
-	//exit(0)	;
-	if(MILU_AUSTIN_TRANSFORM)
-	{
-	parse_tree_node_transform(au->ast);
-	NodeTypeKind * param_type = ASTNodeType_new(NodeTypeKind_Int, NULL);
-	ASTNode * param_node = ASTNode_new_parm_decl_node("mid", param_type);
-	ASTNode * node = ASTNode_new_empty_function_node("killed_mutant", param_node);
-	ASTNode_append_child(au->ast, node);
-	}
+    if(!PARSING_UNITTESTS) //Optimisation for non-Unit test case(non austin test style) 
+    {
+        add_original_non_mutation(au->ast);
+        //	parse_tree_fix_header(src_path, au->ast); //no need , will be removed
+        //ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} \n"); //no need , will be removed
+        //	ASTNode_insert_before(au->ast->children, af);//no need , will be removed
+    }
+    if(MILU_AUSTIN_TRANSFORM) //Transformation for Austin
+    {
+        parse_tree_node_transform(au->ast);
+        NodeTypeKind * param_type = ASTNodeType_new(NodeTypeKind_Int, NULL);
+        ASTNode * param_node = ASTNode_new_parm_decl_node("mid", param_type);
+        ASTNode * node = ASTNode_new_empty_function_node("killed_mutant", param_node);
+        ASTNode_append_child(au->ast, node);
+    }
 	return au;
 }
 
@@ -161,6 +156,8 @@ static gboolean is_current_functions_to_mutate(gchar * func_name)
 //	exit(0);
 	return TRUE;
 }
+
+/* Todo; TO be removed tag system
 static void parse_tree_fix_functions(ASTNode * func)
 {
 	ASTNode * child = func->children;
@@ -208,6 +205,7 @@ static void parse_tree_fix_functions(ASTNode * func)
 	}
 
 }
+*/
 
 static void parse_tree_fix_header(gchar * src_path, ASTNode * root)
 {

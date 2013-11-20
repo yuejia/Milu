@@ -82,7 +82,7 @@ static  GOptionEntry entries[] =
   { "search-strategy", 0, 0, G_OPTION_ARG_STRING, &MILU_SEARCH_STRATEGY, "Set the strategy to search higher order mutants.", "[rand,...]"},
   { "exec-strategy", 0, 0, G_OPTION_ARG_STRING, &MILU_EXEC_STRATEGY, "Set the strategy to execute mutants.", "[mut-1st, test-1st, mut-1st-full, test-1st-full]"},
   { "rand-limit", 0,0, G_OPTION_ARG_INT, &MILU_MUTANT_RAND_LIMIT, "Set the max number of mutants to generate in random mode. The default value is 1000.", "N"},
-  { "func-list", 0,0, G_OPTION_ARG_STRING, &MILU_FUNC_LIST_PATH, "Set the path to a file, selecting a set of functions to mutate.", "path"},
+  { "func-list", 'f',0, G_OPTION_ARG_STRING, &MILU_FUNC_LIST_PATH, "Set the path to a file, selecting a set of functions to mutate.", "path"},
   { "tag-list", 0,0, G_OPTION_ARG_STRING, &MILU_TAG_LIST_PATH, "This is a temp function, set the path to a file, selecting a set of external declarations to reduce the tree size.", "path"},
   { "html", 'h',0, G_OPTION_ARG_NONE, &MILU_HTML_VIEW, "Generate a simple html mutant viewer.", NULL},
   { "mid", 'i',0, G_OPTION_ARG_NONE, &MILU_SAVE_MID, "Generate a Mid file for the current set of mutants.", NULL},
