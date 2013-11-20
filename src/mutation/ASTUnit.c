@@ -938,56 +938,50 @@ void ASTUnit_print(ASTUnit * au, PrintMode mode, FILE * output)
 
 static gint check_binary_op(const char * op)
 {
-	// TODO : fix others
-
-	if (g_strcmp0(op, "+") == 0)
-		return 6;
-	if (g_strcmp0(op, "-") == 0)
-		return 6;
-
-	if (g_strcmp0(op, "*") ==0||
-			g_strcmp0(op, "/") ==0||
-			g_strcmp0(op, "%") == 0)
-		return 5;
-
-	if (g_strcmp0(op, "=") == 0)
-		return 16;
-
-	if (g_strcmp0(op, "&&") == 0)
-		return 13;
-	if (g_strcmp0(op, "||") == 0)
-		return 14;
-
-	if (g_strcmp0(op, "&") == 0)
-		return 10;
-	if (g_strcmp0(op, "^") == 0)
-		return 11;
-            if (g_strcmp0(op, "|") == 0)
-                        return 12;
-
-
+    if (g_strcmp0(op, "*") ==0||
+            g_strcmp0(op, "/") ==0||
+            g_strcmp0(op, "%") == 0)
+        return 5;
+    if (g_strcmp0(op, "+") == 0|| 
+            g_strcmp0(op, "-") == 0)
+        return 6;
+    if (g_strcmp0(op, ">>") == 0 ||
+            g_strcmp0(op, "<<") == 0)
+        return 7;
+    if (g_strcmp0(op,">") ==0 ||
+            g_strcmp0(op,">=") ==0 ||
+            g_strcmp0(op,"<") ==0 ||
+            g_strcmp0(op,"<=") ==0)
+        return 8;
+    if (g_strcmp0(op, "==") == 0|| 
+            g_strcmp0(op, "!=") == 0)
+        return 9;
+    if (g_strcmp0(op, "&") == 0)
+        return 10;
+    if (g_strcmp0(op, "^") == 0)
+        return 11;
+    if (g_strcmp0(op, "|") == 0)
+        return 12;
+    if (g_strcmp0(op, "&&") == 0)
+        return 13;
+    if (g_strcmp0(op, "||") == 0)
+        return 14;
+    if ( g_strcmp0(op, "+=") == 0 ||
+            g_strcmp0(op, "-=") == 0 ||
+            g_strcmp0(op, "*=") == 0 ||
+            g_strcmp0(op, "/=") == 0 ||
+            g_strcmp0(op, "%=") == 0 ||
+            g_strcmp0(op, "<<=") == 0 ||
+            g_strcmp0(op, ">>=") == 0 ||
+            g_strcmp0(op, "&=") == 0 ||
+            g_strcmp0(op, "^=") == 0 ||
+            g_strcmp0(op, "|=") == 0 ||
+            g_strcmp0(op, "=") == 0 )
+        return 15;
     if (g_strcmp0(op, ",") == 0)
-                return 17;
+        return 17;
 
-	if (g_strcmp0(op, ">>") == 0)
-		return 7;
-	if (g_strcmp0(op, "<<") == 0)
-		return 7;
-
-	if (g_strcmp0(op,">") ==0 ||
-			g_strcmp0(op,">=") ==0 ||
-			g_strcmp0(op,"<") ==0 ||
-			g_strcmp0(op,"<=") ==0
-	)
-		return 8;
-
-	if (g_strcmp0(op,"==") ==0 ||
-			g_strcmp0(op,"!=") ==0
-	)
-		return 9;
-
-
-	return 0;
+    return 0;
 }
 
 static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
