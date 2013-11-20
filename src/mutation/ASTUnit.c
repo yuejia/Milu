@@ -962,6 +962,9 @@ static gint check_binary_op(const char * op)
 		return 10;
 	if (g_strcmp0(op, "^") == 0)
 		return 11;
+            if (g_strcmp0(op, "|") == 0)
+                        return 12;
+
 
 	if (g_strcmp0(op, ">>") == 0)
 		return 7;
