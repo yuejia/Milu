@@ -1070,9 +1070,11 @@ static gboolean is_unary_token(gchar * token)
 	    return TRUE;
 	else if(g_strcmp0(token, "&")==0)
 	    return TRUE;
-	else if(g_strcmp0(token, "-")==0)
-	    return TRUE;
-	else
+    else if(g_strcmp0(token, "-")==0)
+        return TRUE;
+    else if(g_strcmp0(token, "~")==0)
+        return TRUE;
+    else
 	    return FALSE;
 
 }
