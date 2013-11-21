@@ -409,7 +409,12 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
                 || g_strcmp0(curr_text,"/=") == 0
                 || g_strcmp0(curr_text,"%=") == 0
                 || g_strcmp0(curr_text,"^=") == 0
-                || g_strcmp0(curr_text,"&=") == 0)
+                || g_strcmp0(curr_text,"&=") == 0
+                || g_strcmp0(curr_text, "<<=") == 0 
+                || g_strcmp0(curr_text, ">>=") == 0 
+                || g_strcmp0(curr_text, "&=") == 0 
+                || g_strcmp0(curr_text, "^=") == 0 
+                || g_strcmp0(curr_text, "|=") == 0) 
             // printf("%s ", clang_getCString( clang_getTokenSpelling(*CurrTU,tokens[i])));
 		    {
             	ASTNode_set_text(node , curr_text);
