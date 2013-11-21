@@ -1188,16 +1188,6 @@ static void clean_ast(ASTNode * root)
 {
     fix_data_types_duplication();
     remove_function_signiture(root);
-//    add_original_non_mutation(root);
-
-/*
-	g_string_append_printf(mem_print,"%s","digraph G{ \n");
-	parse_tree_node_traverse_pre_order (node, &print_dot_label, (gpointer) mem_print);
-	parse_tree_node_traverse_pre_order (node, &print_dot_connection, (gpointer) mem_print);
-	g_string_append_printf(mem_print,"%s","}\n");
-	g_fprintf(output,"%s",mem_print->str);
-	g_string_free(mem_print,TRUE);
-    */
 }
 
 static void remove_function_signiture(ASTNode * root)
