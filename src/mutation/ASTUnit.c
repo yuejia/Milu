@@ -1218,15 +1218,26 @@ static void remove_function_signiture(ASTNode * root)
 	}
 }
 
+// some function contains unexposed attr which are redundant 
+// libclang dependent
 static void fix_function_attribute()
 {
     for(gint i = 0 ; i < FuncLists-> len ; i ++)
     {
     gboolean fixed = FALSE;
     	ASTNode * curr_func = g_ptr_array_index(FuncLists, i);
-        if (ASTNode_search_children(curr_func, NodeKind_UnexposedAttr))
+        while (ASTNode_search_children(curr_func, NodeKind_UnexposedAttr))
         {
+            ASTNode * last_attr_node = ASTNode_get_nth_child(curr_func, ASTNode_get_children_number(curr_func));
+            if(last_attr_node->kind == NodeKind_UnexposedAttr)
+            {
+        				ASTNode_unlink(last_attr_node);
+                         continue;
+           }
+
+            
         	ASTNode * curr_attr_node = curr_func->children;
+
         	while(curr_attr_node)
         	{
 
