@@ -132,11 +132,14 @@ Operator * get_OCNG_operator();
 Operator * get_OIDO_operator();
 Operator * get_SBRC_operator();
 
+
 Operator * get_Austin_ORRN_operator();
 Operator * get_Austin_OAAN_operator();
 Operator * get_Austin_OLLN_operator();
 Operator * get_Austin_OLNG_operator();
 Operator * get_Austin_CRCR_operator();
+
+Operator * get_SSDL_operator();
 // free
 
 #endif /* MUTATIONOPERATORS_H_ */

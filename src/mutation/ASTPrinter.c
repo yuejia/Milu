@@ -956,7 +956,6 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
 		case NodeKind_CompoundStmt:
 		case NodeKind_BreakStmt:
 		case NodeKind_GotoStmt:
-
         case NodeKind_ParenExpr: //added a expression  type
 		{
             if(!is_else)
