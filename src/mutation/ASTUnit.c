@@ -1005,22 +1005,39 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
             skip_par--;
 
 		if(skip_par == 0)
-		{
-		gint curr_token_weight = check_binary_op(curr_token);
-		if(curr_token_weight)
-		{
-			if (curr_token_weight > big_weight)
-			{
-				if (big_op)
-					g_free(big_op);
-				big_op = g_strdup(curr_token);
-				big_weight = curr_token_weight;
-			}
-		}
-		}
-		clang_disposeString(token_cstr);
-	}
-	return big_op;
+        {
+            gint curr_token_weight = check_binary_op(curr_token);
+            if(curr_token_weight)
+            {
+
+                if (curr_token_weight == 10)
+                {
+                    if ((i-1) >= 0)
+                    {
+                        CXString tmp_token_cstr = clang_getTokenSpelling(*CurrTU,tokens[i-1]);
+                        const char * tmp_curr_token = clang_getCString(tmp_token_cstr);
+                        gint tmp_curr_token_weight = check_binary_op(tmp_curr_token);
+                        clang_disposeString(tmp_token_cstr);
+                        if(tmp_curr_token_weight)
+                        {
+                            continue;
+                        }
+
+                    }
+                }
+
+                if (curr_token_weight > big_weight)
+                {
+                    if (big_op)
+                        g_free(big_op);
+                    big_op = g_strdup(curr_token);
+                    big_weight = curr_token_weight;
+                }
+            }
+        }
+        clang_disposeString(token_cstr);
+    }
+    return big_op;
 }
 
 static gboolean search_curr_source_file(gchar * text)
