@@ -21,9 +21,16 @@ git clone https://github.com/yuejia/Milu
 
 ## Compilation in Ubuntu
 
-sudo apt-get install build-essential libglib2.0-dev llvm libclang-dev 
-cd Milu
-make
+- sudo apt-get install build-essential libglib2.0-dev llvm libclang-dev
+- git clone https://github.com/yuejia/Milu
+- cd Milu
+- make
+
+## Usage 
+- ./bin/milu -f func.txt src.c 
+NB: src.c need to be processed by gcc -E, func.txt contains a list of names of the functions under test
+
+- ./bin/milu -? (to show options)
 
 ## Acknowledgement
 
