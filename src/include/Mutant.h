@@ -67,6 +67,7 @@ struct MiluMutant
     GArray * results;   /**< The results. */
     GPtrArray * foms;  /**< The foms constructing HOMs */
     gdouble fitness; /** < Fitness value */
+    gint line_first;
 
 		// old
 //	gchar * path;

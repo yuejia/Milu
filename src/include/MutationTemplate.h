@@ -153,8 +153,9 @@ void mutation_template_num_form_print(GArray * mut_num_template, FILE * output);
  *
  * \param loc The given location.
  * \param id The type of mutation.
+ * \return the line number of the mutation
  **/
-void mutation_template_apply_mutation(gint loc, gint id);
+gint mutation_template_apply_mutation(gint loc, gint id);
 
 /**
  * \brief Clean a given mutation at a give location.

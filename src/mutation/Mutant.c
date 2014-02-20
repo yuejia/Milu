@@ -42,11 +42,14 @@ static void apply_mutation(Mutant * mut)
 {
 	gint curr_id = 0;
 	gint curr_loc = 0;
+        gint line = 0;
 	for (gint i = 0; i < mut->id->len; i = i + 2)
 	{
 		curr_loc = g_array_index(mut->id, gint, i);
 		curr_id = g_array_index(mut->id, gint, i + 1);
-		mutation_template_apply_mutation(curr_loc, curr_id);
+		line = mutation_template_apply_mutation(curr_loc, curr_id);
+                if(i == 0)
+                        mut->line_first = line;
 	}
 }
 
@@ -132,6 +135,12 @@ void mutant_save(Mutant * mut)
 	clean_mutation(mut);
 
 	fclose(mfile);
+
+	g_string_printf(cmd,"%s/line",mut->base_path);
+	mfile = fopen(cmd->str,"w");
+        fprintf(mfile,"%d",mut->line_first);
+	fclose(mfile);
+        
 	g_string_free(cmd, TRUE);
 }
 

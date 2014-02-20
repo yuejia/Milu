@@ -309,8 +309,8 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		clang_getSpellingLocation ( clang_getRangeEnd(ran), NULL, &line1, &column1, &offset1);
 		node->line_start = line;
 		node->line_end = line1;
-		//printf("%u %u %u\n", line, column, offset);
-		//printf("%u %u %u\n", line1, column1, offset1);
+//		printf("%u %u %u\n", line, column, offset);
+//		printf("%u %u %u\n", line1, column1, offset1);
 	}
 	else
 	{
