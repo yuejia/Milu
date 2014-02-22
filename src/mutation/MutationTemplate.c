@@ -172,7 +172,7 @@ void mutation_template_clean_mutation(gint loc, gint id)
 		}
 }
 
-gint mutation_template_apply_mutation(gint loc, gint id)
+void mutation_template_apply_mutation(gint loc, gint id)
 {
 	GPtrArray * curr_mutators = g_ptr_array_index(curr_mutation_template, loc);
 	ASTNode * curr_node = g_ptr_array_index(curr_mutation_locations, loc);
@@ -194,7 +194,6 @@ gint mutation_template_apply_mutation(gint loc, gint id)
 			break; // bug fix Yue: October 27, 2012
 		}
 	}
-        return curr_node->line_start; 
 }
 
 
