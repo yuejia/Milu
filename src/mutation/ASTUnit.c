@@ -309,8 +309,8 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		clang_getSpellingLocation ( clang_getRangeEnd(ran), NULL, &line1, &column1, &offset1);
 		node->line_start = line;
 		node->line_end = line1;
-//		printf("%u %u %u\n", line, column, offset);
-//		printf("%u %u %u\n", line1, column1, offset1);
+//		printf("-%u %u %u\n", line, column, offset);
+//		printf("-%u %u %u\n\n", line1, column1, offset1);
 	}
 	else
 	{
@@ -344,7 +344,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		clang_disposeString(token_cstr);
         }
 
-		clang_disposeTokens (&CurrTU, tokens, tokens_size);
+		clang_disposeTokens (*CurrTU, tokens, tokens_size);
 		clang_visitChildren(cursor, visit_ast, node);
 
 		break;
@@ -371,7 +371,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 
 		clang_disposeString(token_cstr);
 
-		clang_disposeTokens (&CurrTU, tokens, tokens_size);
+		clang_disposeTokens (*CurrTU, tokens, tokens_size);
 		clang_visitChildren(cursor, visit_ast, node);
 
 		break;
@@ -431,7 +431,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		prev_binary_column = column;
 		prev_binary_offset = offset;
 */
-		clang_disposeTokens (&CurrTU, tokens, tokens_size);
+		clang_disposeTokens (*CurrTU, tokens, tokens_size);
 		clang_visitChildren(cursor, visit_ast, node);
 
 		break;
@@ -472,7 +472,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		prev_binary_line = line;
 		prev_binary_column = column;
 		prev_binary_offset = offset;
-		clang_disposeTokens (&CurrTU, tokens, tokens_size);
+		clang_disposeTokens (*CurrTU, tokens, tokens_size);
 		clang_visitChildren(cursor, visit_ast, node);
 
 		break;
@@ -489,6 +489,29 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		    ASTNode_new_with_parent(node, NodeKind_MiluSource, p, NULL);
             g_free(p);
         }
+
+
+{
+	CXSourceLocation loc;	
+		unsigned line;
+		unsigned column;
+		unsigned offset;
+	CXSourceRange  ran = clang_getCursorExtent (*CurrFunc);
+	CXToken * tokens = NULL;
+	unsigned tokens_num = 0;
+	clang_tokenize	((*CurrTU), ran, &tokens, &tokens_num);
+
+	if (tokens_num > 0)
+	{
+		loc = clang_getTokenLocation(*CurrTU,tokens[0]);
+	}
+	clang_getSpellingLocation (loc, NULL, &line, &column, &offset);
+//	printf("+%u %u %u\n", line, column, offset);
+	clang_disposeTokens(*CurrTU, tokens, tokens_num);
+	node->line_start = line;
+}
+
+
 
 		clang_visitChildren(cursor, visit_ast, node);
 
@@ -536,7 +559,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
             		clang_disposeString(token_cstr);
                     }
 
-            		clang_disposeTokens (&CurrTU, tokens, tokens_size);
+            		clang_disposeTokens (*CurrTU, tokens, tokens_size);
 
             		ASTNode_add_type(node, NodeTypeKind_Unexposed, NULL);
                      ASTNodeType_set_text(node,tmp_string->str);
@@ -581,7 +604,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 			node->type->text = g_string_chunk_insert (MiluStringPool, token_fix_text);
 
 			clang_disposeString(token_cstr);
-			clang_disposeTokens (&CurrTU, tokens, tokens_size);
+			clang_disposeTokens (*CurrTU, tokens, tokens_size);
 		}
 		else if(clang_getCursorType(cursor).kind == NodeTypeKind_Pointer)
         {
@@ -642,7 +665,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		if(search_curr_source_file(tmp_string->str))
 			ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
 
-		clang_disposeTokens(&CurrTU, tokens, tokens_num);
+		clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 		g_string_free(tmp_string, TRUE);
 
@@ -672,7 +695,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		        }
 				ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
 
-		        clang_disposeTokens(&CurrTU, tokens, tokens_num);
+		        clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 		        g_string_free(tmp_string, TRUE);
 
@@ -714,7 +737,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
         //			ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
 		ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
 
-        clang_disposeTokens(&CurrTU, tokens, tokens_num);
+        clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
         g_string_free(tmp_string, TRUE);
 
@@ -735,7 +758,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 
 		ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
 
-		clang_disposeTokens(&CurrTU, tokens, tokens_num);
+		clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 		g_string_free(tmp_string, TRUE);
 
@@ -757,7 +780,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		}
 
 		clang_disposeString(token_cstri);
-		clang_disposeTokens(&CurrTU, tokens, tokens_num);
+		clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 		clang_visitChildren(cursor, visit_ast, node);
 		break;
@@ -834,7 +857,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 			}
 			clang_disposeString(token_cstr);
 
-			clang_disposeTokens(&CurrTU, tokens, tokens_num);
+			clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 			g_string_free(tmp_string, TRUE);
 			}
@@ -877,7 +900,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		{
 			g_assert_not_reached();
 		}
-		clang_disposeTokens(&CurrTU, tokens, tokens_num);
+		clang_disposeTokens(*CurrTU, tokens, tokens_num);
 		g_string_free(tmp_string, TRUE);
 
 		clang_visitChildren(cursor, visit_ast, node);
@@ -1315,7 +1338,7 @@ static gchar * resolve_function_attribute()
 		}
 	}
 
-	clang_disposeTokens(&CurrTU, tokens, tokens_num);
+	clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
                 return g_string_free(buff, FALSE);
 }
@@ -1385,7 +1408,7 @@ static gboolean fix_function_ellipsis()
 		}
 	}
 
-	clang_disposeTokens(&CurrTU, tokens, tokens_num);
+	clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 	return FALSE;
 }
@@ -1422,7 +1445,7 @@ static gboolean fix_function_static()
 		}
 	}
 
-	clang_disposeTokens(&CurrTU, tokens, tokens_num);
+	clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
 	return FALSE;
 }
@@ -1472,7 +1495,7 @@ static gchar * reset_function_text(ASTNode * func)
     ASTNode_set_text(func,tmp_string->str);
     func->kind = NodeKind_MiluSource;
 
-	clang_disposeTokens(&CurrTU, tokens, tokens_num);
+	clang_disposeTokens(*CurrTU, tokens, tokens_num);
     g_string_free(tmp_string, TRUE);
 
 	return FALSE;
