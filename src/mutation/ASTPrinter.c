@@ -327,7 +327,8 @@ static gboolean print_dot_label(ASTNode * node,gpointer data)
 //	}
 	default:
 	{
-		g_string_append_printf((GString *) data,"%lu [label=\"%s:%s\"];\n",node->id, ASTNodeKindNames[node->kind], node->text);
+
+		g_string_append_printf((GString *) data,"%lu [label=\"%s:%.8s\"];\n",node->id, ASTNodeKindNames[node->kind], node->text);
 		html_lines++;
 		break;
 	}
