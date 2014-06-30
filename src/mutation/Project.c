@@ -292,7 +292,7 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 			mutant_save_html(curr_mut);
 			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
 			//fprintf(fmut_list, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
-			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html\" class=\"mut_code\">Mut %d</a><br />",i-1, i);
+			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html\" class=\"mut_code\">Mut %d</a><br />",i+1, i);
 		}
 		else
 		{
@@ -301,7 +301,7 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 			mutant_save_html(curr_mut);
 			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
 			//fprintf(fmut_list, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
-			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html\" class=\"mut_code\">Mut %d</a><br />",i-1, i);
+			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html\" class=\"mut_code\">Mut %d</a><br />",i+1, i);
 		}
 		}
 
