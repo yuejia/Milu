@@ -217,13 +217,16 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 	//TODO: fix fix fix just for ms ddate
 //	g_string_printf(cmd,"%s %s/%s %s -lm -o %s/%s",command, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()), driver,  mut->bin_path, "mut.exe");
 
-	g_string_printf(cmd,"cat %s >> %s/%s",driver, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
+	if(driver)
+	{
+		g_string_printf(cmd,"cat %s >> %s/%s",driver, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
+	system(cmd->str);
+	}
 //printf("%s\n",cmd->str);
 //	g_string_printf(cmd,"%s/%s", mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
 
 //	ff = fopen("driver")
 
-	system(cmd->str);
 	/*
 	g_spawn_command_line_sync (cmd->str,
 				NULL, //gchar **standard_output,

@@ -147,7 +147,9 @@ void milu_options_parse(int argc, char *argv[ ])
 
 	if(MILU_TEST_DRIVER_PATH == NULL)
 	{
-		MILU_TEST_DRIVER_PATH= g_strdup("milu_driver.c");
+		//MILU_TEST_DRIVER_PATH= g_strdup("milu_driver.c");
+		//Yue August 7, 2014 ignore driver if not given
+		MILU_TEST_DRIVER_PATH= NULL;//g_strdup("");
 	}
 
 	if(MP_NUM > 0)

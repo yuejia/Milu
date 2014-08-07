@@ -142,6 +142,11 @@ int main(int argc, char *argv[ ] ) {
 			g_string_free(cmd, TRUE);
 		}
 	}
+	else if(project->compilation_cmd)
+	{
+		milu_project_prepare_original_program(project);
+		milu_compile_mutants(mutants);
+	}
 
 
     if(milu_options_get_html_view() &&  !milu_options_not_save_mutants())

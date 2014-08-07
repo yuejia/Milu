@@ -87,6 +87,7 @@ void milu_compile_mutants(GPtrArray * mutants)
 	// mutants_compile(mutants, MILU_GLOBAL_COMPILER, project->test_driver_path);
 }
 
+
 void milu_run_mutation_testing(Project * project, GPtrArray * mutants, StrategyType strategy_type)
 {
 	g_assert(project && mutants && "Invalid arguments!");

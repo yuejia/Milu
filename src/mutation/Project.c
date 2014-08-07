@@ -85,7 +85,7 @@ Project * milu_project_new(const gchar * source_path, const gchar * output_path,
         project->test_inputs = test_inputs_load(tests_path);
     }
 
-	project->ast_unit = ASTUnit_new(project->source_path);
+    project->ast_unit = ASTUnit_new(project->source_path);
     project->mutation_locations = g_ptr_array_new();
     project->mutation_template = g_ptr_array_new();
  //   project->func_nodes = g_ptr_array_new();
