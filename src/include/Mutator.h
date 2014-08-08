@@ -203,6 +203,8 @@ Mutator * mutator_milu_break_continue_replacement();
 //ABS
 Mutator *  mutator_milu_integer_var_abs_insertion();
 Mutator *  mutator_milu_float_var_abs_insertion();
+//UOI
+Mutator *  mutator_milu_integer_var_uoi_insertion();
 
 //AUSTIN
 Mutator * mutator_austin_milu_greater_relational_replacement();
