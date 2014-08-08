@@ -96,7 +96,11 @@ ASTUnit * ASTUnit_new(const gchar * src_path)
 	au->file_path = g_string_chunk_insert (MiluStringPool, src_path);
 	au->file_name = g_string_chunk_insert(MiluStringPool, g_path_get_basename (src_path));
 	load_c_source_file(src_path);
+
+    	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Libclang parse file")  : 0 ;
 	libclang_parse_file(au, argc, argv);
+
+    	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"AST Clean tree")  : 0 ;
 	parse_tree_node_clean(au->ast);
 
 // TODO:remove the old tag system
@@ -104,13 +108,16 @@ ASTUnit * ASTUnit_new(const gchar * src_path)
 
     if(!PARSING_UNITTESTS) //Optimisation for non-Unit test case(non austin test style) 
     {
+    	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"AST add non mutation src")  : 0 ;
         add_original_non_mutation(au->ast);
         //	parse_tree_fix_header(src_path, au->ast); //no need , will be removed
         //ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} \n"); //no need , will be removed
         //	ASTNode_insert_before(au->ast->children, af);//no need , will be removed
     }
+
     if(MILU_AUSTIN_TRANSFORM) //Transformation for Austin
     {
+    	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Run austin transformation")  : 0 ;
         parse_tree_node_transform(au->ast);
         NodeTypeKind * param_type = ASTNodeType_new(NodeTypeKind_Int, NULL);
         ASTNode * param_node = ASTNode_new_parm_decl_node("mid", param_type);

@@ -752,8 +752,11 @@ ASTNode * ASTNode_shallow_copy(ASTNode * node, gboolean copy_child)
 {
 	ASTNode * copy = ASTNode_new(node->kind, node->text, node->cx);
 
-	ASTNode_add_type(copy,node->type->kind,node->type->node);
-	copy->type->text = node->type->text;
+	if(node->type)
+	{
+		ASTNode_add_type(copy,node->type->kind,node->type->node);
+		copy->type->text = node->type->text;
+	}
 
 	ASTNode * child = node->children;
 	while(child && copy_child)
@@ -834,6 +837,8 @@ void parse_tree_node_transform(ASTNode * node)
     This is libclang dependent.*/
 void parse_tree_node_clean(ASTNode * node)
 {
+
+//   MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,node->text)  : 0 ;
 	if (node->children)
 	{
 		ASTNode * child;

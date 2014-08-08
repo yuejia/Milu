@@ -72,8 +72,14 @@ int main(int argc, char *argv[ ] ) {
             g_log ("Milu",G_LOG_LEVEL_ERROR,"Please use --debug=src or --debug=dot!");
 	}
 
+	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Load function") : 0;
 	milu_project_load_function_settings(project, milu_options_get_func_list_path());
+
+	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Load operators") : 0;
 	milu_project_load_mut_operators_settings(project, milu_options_get_mut_operators_path());
+
+
+	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Analyse Temple") : 0;
     milu_project_analyse_template(project);
 
     /*

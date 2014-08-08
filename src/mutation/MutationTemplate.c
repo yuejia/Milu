@@ -52,6 +52,8 @@ void milu_mutation_analyse(GPtrArray * functions, GPtrArray * mut_operators, GPt
 	 g_assert(functions && mut_operators &&  mut_locations && mut_template && "Invalid arguments!");
 	 g_assert(functions->len > 0 && mut_operators->len > 0 && "Invalid arguments!");
 
+    	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"milu_mutation_analyse.")  : 0 ;
+
 	curr_mutation_operators = mut_operators;
 	curr_mutation_locations = g_ptr_array_new();
 	curr_mutation_template = g_ptr_array_new();

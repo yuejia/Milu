@@ -66,6 +66,7 @@ Project * milu_project_new(const gchar * source_path, const gchar * output_path,
 		g_log ("Milu",G_LOG_LEVEL_ERROR,"Cannot find the source file.") ;
 	}
 
+	   MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Project load parameters")  : 0 ;
     Project * project = g_slice_new0(Project);
     project->output_path = output_path ? g_string_chunk_insert (MiluStringPool, output_path) : NULL;
     project->source_path = source_path ? g_string_chunk_insert (MiluStringPool, source_path) : NULL;
@@ -85,7 +86,9 @@ Project * milu_project_new(const gchar * source_path, const gchar * output_path,
         project->test_inputs = test_inputs_load(tests_path);
     }
 
+    MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Project Analyse AST")  : 0 ;
     project->ast_unit = ASTUnit_new(project->source_path);
+
     project->mutation_locations = g_ptr_array_new();
     project->mutation_template = g_ptr_array_new();
  //   project->func_nodes = g_ptr_array_new();
@@ -211,7 +214,6 @@ void milu_project_load_function_settings(Project * project, const gchar * func_p
     {
     //	if(project->func_nodes)
     //		g_ptr_array_free(project->func_nodes, TRUE);
-
 
     		GPtrArray * func_text = milu_utility_load_text_file_to_gptrarray(func_path);
     		for(gint i = 0 ; i < project->func_nodes->len; i++)
