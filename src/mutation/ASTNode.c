@@ -751,6 +751,10 @@ ASTNode * ASTNode_deep_copy(ASTNode * node, gboolean copy_child)
 ASTNode * ASTNode_shallow_copy(ASTNode * node, gboolean copy_child)
 {
 	ASTNode * copy = ASTNode_new(node->kind, node->text, node->cx);
+
+	ASTNode_add_type(copy,node->type->kind,node->type->node);
+	copy->type->text = node->type->text;
+
 	ASTNode * child = node->children;
 	while(child && copy_child)
 	{

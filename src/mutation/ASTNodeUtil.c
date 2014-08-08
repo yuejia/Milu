@@ -157,6 +157,13 @@ void set_ASTNode_kind(ASTNode * node, NodeKind kind)
 	node->kind = kind;
 }
 
+gboolean ASTNode_is_first_child(const ASTNode * parent, const ASTNode * node)
+{
+    g_assert(parent && node && "Invalid ASTNodes!");
+    ASTNode * children = parent->children;
+    return children == node;
+}
+
 gboolean ASTNode_is_last_child(const ASTNode * parent, const ASTNode * node)
 {
 	g_assert(parent && node && "Invalid ASTNodes!");
@@ -236,6 +243,60 @@ gboolean is_ASTNode_if_expression(const ASTNode * node)
 	if(node->parent)
 	return  node->parent->kind == NodeKind_IfStmt && node->parent->children == node;
 
+	return FALSE;
+}
+
+gboolean is_ASTNode_while_expression(const ASTNode * node)
+{
+ 	//TODO August 8, 2014
+	return FALSE;
+}
+
+gboolean is_ASTNode_kind_decl_ref_expr(const ASTNode * node)
+{
+	return is_ASTNode_has_kind(node, NodeKind_DeclRefExpr);
+}
+
+gboolean is_ASTNode_right_hand_var(const ASTNode * node)
+{
+
+	if(is_ASTNode_has_kind(node, NodeKind_DeclRefExpr))
+	{
+		if(is_ASTNode_assign_op(node->parent) && ASTNode_is_first_child(node->parent,node))
+		return FALSE;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_int_var(const ASTNode * node)
+{
+
+	// cover int, short, long, longlong
+	if(is_ASTNode_has_kind(node, NodeKind_DeclRefExpr))
+	{
+		if(node->type)
+			if(strcmp(node->type->text, "int") == 0
+			||strcmp(node->type->text, "short") == 0
+			||strcmp(node->type->text, "long") == 0
+			||strcmp(node->type->text, "longlong") == 0
+		)
+				return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_float_var(const ASTNode * node)
+{
+
+	if(is_ASTNode_has_kind(node, NodeKind_DeclRefExpr))
+	{
+		if(node->type)
+			if(strcmp(node->type->text, "float") == 0
+			||strcmp(node->type->text, "double") == 0
+)
+				return TRUE;
+	}
 	return FALSE;
 }
 

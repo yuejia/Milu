@@ -294,6 +294,44 @@ gboolean is_ASTNode_not_equal_op(const ASTNode * node);
 gboolean is_ASTNode_kind_binary_operator(const ASTNode * node);
 
 /**
+ * \brief Check if the given node is a Var.
+ *
+ * \param The given node to check.
+ *
+ * \return TRUE is the given node is a Var node.
+ **/
+gboolean is_ASTNode_kind_decl_ref_expr(const ASTNode * node);
+
+
+/**
+ * \brief Check if the given node is a right hand Var.
+ *
+ * \param The given node to check.
+ *
+ * \return TRUE is the given node is a right Var node.
+ **/
+gboolean is_ASTNode_right_hand_var(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is a int hand Var.
+ *
+ * \param The given node to check.
+ *
+ * \return TRUE is the given node is a int Var node.
+ **/
+gboolean is_ASTNode_int_var(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is a int hand Var.
+ *
+ * \param The given node to check.
+ *
+ * \return TRUE is the given node is a int Var node.
+ **/
+gboolean is_ASTNode_float_var(const ASTNode * node);
+
+
+/**
  * \brief Check if the given node is a integer.
  *
  * \param The given node to check.
@@ -319,6 +357,17 @@ gboolean is_ASTNode_kind_float_literal(const ASTNode * node);
  * \return TRUE is the given node is a if expression node.
  **/
 gboolean is_ASTNode_if_expression(const ASTNode * node);
+
+
+/**
+ * \brief Check if the given node is a while expression node.
+ *
+ * \param The given node to check.
+ *
+ * \return TRUE is the given node is a while expression node.
+ **/
+gboolean is_ASTNode_while_expression(const ASTNode * node);
+
 /**
  * \brief Check if the given node is a compound assign operator.
  *
@@ -370,6 +419,14 @@ void set_ASTNode_kind(ASTNode * node, NodeKind kind);
  **/
 gboolean ASTNode_is_last_child(const ASTNode * parent, const ASTNode * node);
 
+/**
+ * \brief Check if the given node is the first node of the parent.
+ *
+ * \param The given node to check.
+ *
+ * \return TRUE is the given node is the first node.
+ **/
+gboolean ASTNode_is_first_child(const ASTNode * parent, const ASTNode * node);
 
 /**
  * \brief Get the number of children of the given ASTNode.

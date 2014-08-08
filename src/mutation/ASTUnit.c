@@ -35,6 +35,7 @@ static gchar * curr_src = NULL;
 static GPtrArray * DataTypes = NULL;
 static CXCursor * CurrFunc = NULL;
 static GPtrArray * FuncLists = NULL;
+static GHashTable* localSymTable = NULL;
 
 static unsigned prev_binary_line = 100;
 static unsigned prev_binary_column=100;
@@ -260,17 +261,22 @@ static void libclang_parse_file(ASTUnit* au, int argc, char *argv[ ] )
 
     //TODO Free Datatypes
 
-	CXCursor cursor =  clang_getTranslationUnitCursor(TU);
+    CXCursor cursor =  clang_getTranslationUnitCursor(TU);
 
-	clang_visitChildren(cursor, visit_ast, ast);
+    clang_visitChildren(cursor, visit_ast, ast);
 
+    if(localSymTable)
+    {
+	    g_hash_table_destroy(localSymTable);
+	    localSymTable = NULL;
+    }
     fix_function_attribute();
     clean_ast(ast);
-//	if(!PARSING_UNITTESTS)
-//    add_original_non_mutation(ast);
+    //	if(!PARSING_UNITTESTS)
+    //    add_original_non_mutation(ast);
 
-	clang_disposeTranslationUnit(TU);
-	clang_disposeIndex(Index);
+    clang_disposeTranslationUnit(TU);
+    clang_disposeIndex(Index);
 }
 
 static gboolean parsing_in_func =FALSE;
@@ -285,9 +291,19 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	{
 		gchar * func_name = (gchar *)clang_getCString(cstr);
 		if(is_current_functions_to_mutate(func_name))
-		parsing_in_func = TRUE;
+		{
+			parsing_in_func = TRUE;
+			localSymTable = g_hash_table_new(g_str_hash,g_str_equal);
+		}
 		else
-		parsing_in_func = FALSE;
+		{
+			if(localSymTable)
+			{
+				g_hash_table_destroy(localSymTable);
+				localSymTable = NULL;
+			}
+			parsing_in_func = FALSE;
+		}
 	}
 	if(parsing_in_func)
 	{
@@ -623,6 +639,10 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 
 		//TODO need to deal with same declarion with block
 
+
+		g_hash_table_insert(localSymTable, node->text, ASTNodeTypeKindNames[node->type->kind]);
+		//printf("-----%s %s\n", node->text, ASTNodeTypeKindNames[node->type->kind]);
+
 		clang_visitChildren(cursor, visit_ast, node);
 		break;
 	}
@@ -802,7 +822,6 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	case NodeKind_NullStmt:
 	case NodeKind_TypeRef:
 	case NodeKind_ArraySubscriptExpr:
-	case NodeKind_DeclRefExpr:
 	case NodeKind_DeclStmt:
 	case NodeKind_FieldDecl:
 	case NodeKind_IfStmt:
@@ -814,6 +833,15 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	case NodeKind_ConditionalOperator :
 	case NodeKind_InitListExpr :
 		clang_visitChildren(cursor, visit_ast, node);
+		break;
+
+	case NodeKind_DeclRefExpr:
+		ASTNode_add_type(node, (NodeTypeKind) 1, NULL);
+		ASTNodeType_set_text(node, g_hash_table_lookup(localSymTable, node->text));
+		
+		clang_visitChildren(cursor, visit_ast, node);
+		
+	//	printf("-%s: %s\n", node->text, g_hash_table_lookup(localSymTable, node->text));
 		break;
 
 	case NodeKind_UnexposedExpr:

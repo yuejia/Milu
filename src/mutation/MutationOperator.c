@@ -116,6 +116,10 @@ GPtrArray * mutation_operators_load(const gchar * mut_op_path)
             {
             	g_ptr_array_add(operators, (gpointer)get_SSDL_operator());
             }
+            else if(g_strcmp0("ABS", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_ABS_operator());
+            }
             else if(g_strcmp0("Austin_ORRN", op_name) == 0)
             {
             	g_ptr_array_add(operators, (gpointer)get_Austin_ORRN_operator());
