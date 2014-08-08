@@ -38,6 +38,7 @@ Operator * get_OCNG_operator()
 
 
 	g_ptr_array_add(op->mutators, (gpointer) mutator_milu_if_expression_negation());
+	g_ptr_array_add(op->mutators, (gpointer) mutator_milu_while_expression_negation());
 
 	return op;
 }

@@ -191,6 +191,7 @@ Mutator * mutator_milu_float_constant_replacement();
 
 //OCNG
 Mutator * mutator_milu_if_expression_negation();
+Mutator * mutator_milu_while_expression_negation();
 
 //OIDO
 Mutator * mutator_milu_prefix_increment_replacement();

@@ -248,7 +248,9 @@ gboolean is_ASTNode_if_expression(const ASTNode * node)
 
 gboolean is_ASTNode_while_expression(const ASTNode * node)
 {
- 	//TODO August 8, 2014
+	if(node->parent)
+	return  node->parent->kind == NodeKind_WhileStmt && node->parent->children == node;
+
 	return FALSE;
 }
 

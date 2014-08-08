@@ -31,31 +31,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASTNodeUtil.h"
 #include "ASTNode.h"
 
-static gboolean mutator_milu_if_expression_negation_node_checking(ASTNode *);
-static gboolean mutator_milu_if_expression_negation_clean(ASTNode * node, gint type);
-static gboolean mutator_milu_if_expression_negation_mutate(ASTNode * node, gint type);
+static gboolean mutator_milu_while_expression_negation_node_checking(ASTNode *);
+static gboolean mutator_milu_while_expression_negation_clean(ASTNode * node, gint type);
+static gboolean mutator_milu_while_expression_negation_mutate(ASTNode * node, gint type);
 
 
-Mutator * mutator_milu_if_expression_negation()
+Mutator * mutator_milu_while_expression_negation()
 {
 	Mutator * mut = mutator_new("Logical And", "");
-	mut->node_checking = & mutator_milu_if_expression_negation_node_checking;
-	mut->mutate = & mutator_milu_if_expression_negation_mutate;
-	mut->clean = & mutator_milu_if_expression_negation_clean;
+	mut->node_checking = & mutator_milu_while_expression_negation_node_checking;
+	mut->mutate = & mutator_milu_while_expression_negation_mutate;
+	mut->clean = & mutator_milu_while_expression_negation_clean;
 	mut->size = 1;
 	return mut;
 }
 
 
-static gboolean mutator_milu_if_expression_negation_node_checking(ASTNode * node)
+static gboolean mutator_milu_while_expression_negation_node_checking(ASTNode * node)
 {
-//	if( is_ASTNode_if_expression(node) && !is_ASTNode_and_op(node) && !is_ASTNode_or_op(node))
-//		return TRUE;
-	//return FALSE;
-	return is_ASTNode_if_expression(node);
+	/*
+	if( is_ASTNode_while_expression(node) && !is_ASTNode_and_op(node) && !is_ASTNode_or_op(node))
+		return TRUE;
+	return FALSE;
+*/
+	return is_ASTNode_while_expression(node);
+		
 }
 
-static gboolean mutator_milu_if_expression_negation_mutate(ASTNode * node, gint type)
+static gboolean mutator_milu_while_expression_negation_mutate(ASTNode * node, gint type)
 {
 	ASTNode * pnode ;
 	ASTNode * unode ;
@@ -85,7 +88,7 @@ static gboolean mutator_milu_if_expression_negation_mutate(ASTNode * node, gint 
 	return FALSE;
 }
 
-static gboolean mutator_milu_if_expression_negation_clean(ASTNode * node,gint type)
+static gboolean mutator_milu_while_expression_negation_clean(ASTNode * node,gint type)
 {
 
 	ASTNode * cnode;
