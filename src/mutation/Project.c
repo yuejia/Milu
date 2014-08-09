@@ -96,11 +96,11 @@ Project * milu_project_new(const gchar * source_path, const gchar * output_path,
     project->func_nodes = ASTUnit_get_current_func_list();
 
     milu_utility_check_dir(project->output_path);
-	GString * cmd = g_string_new("");
+    GString * cmd = g_string_new("");
     g_string_printf(cmd, "%s/mutants", project->output_path);
     project->mutants_path = g_string_chunk_insert(MiluStringPool, cmd->str);
     milu_utility_check_dir(project->mutants_path);
-	g_string_free(cmd, TRUE);
+    g_string_free(cmd, TRUE);
 
  /*   if(milu_project_is_executable(project))
     {

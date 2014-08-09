@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <glib.h>
 
 gboolean MILU_GLOBAL_VERBOSE = FALSE;
+gboolean MILU_PRINT_MUT_TYPE= FALSE;
 static gint MP_NUM = -1;
 static gint MILU_MUTANT_ORDER = 1;
 static gint MILU_MUTANT_ORDER_BEGIN = -1;
@@ -64,6 +65,7 @@ gboolean MILU_KILLING_RESULT= FALSE;
 static  GOptionEntry entries[] =
 {
   { "verbose", 'v', 0, G_OPTION_ARG_NONE, &MILU_GLOBAL_VERBOSE, "Be verbose.", NULL },
+  { "print-mutants-type", 0, 0, G_OPTION_ARG_NONE, &MILU_PRINT_MUT_TYPE, "Print a list of mutation operators applied.", NULL },
   { "unit-test", 'u', 0, G_OPTION_ARG_NONE, &MILU_UNIT_TEST, "Unit test case.", NULL },
   { "killing-result", 'k', 0, G_OPTION_ARG_NONE, &MILU_KILLING_RESULT, "Get Milu Killing results.", NULL },
   { "save-killing-result", 0, 0, G_OPTION_ARG_NONE, &MILU_SAVE_KILLING_RESULT, "SAVE Milu Killing results.", NULL },

@@ -34,6 +34,8 @@ static GPtrArray * curr_mutation_locations =  NULL;
 static GPtrArray * curr_mutation_template  = NULL;
 static MutationNumTemplate * curr_mutation_num_template  = NULL;
 
+extern gboolean MILU_PRINT_MUT_TYPE;
+
 
 // Private function interface
 
@@ -61,11 +63,14 @@ void milu_mutation_analyse(GPtrArray * functions, GPtrArray * mut_operators, GPt
 	*mut_locations = curr_mutation_locations;
 	*mut_template = curr_mutation_template;
 
+
     for (gint i = 0 ; i < functions->len; i++)
     {
     	ASTNode * curr_func = g_ptr_array_index(functions, i);
 	    parse_tree_node_traverse_pre_order (curr_func, &mutation_template_check_mutation, NULL);
     }
+
+
 }
 
 GArray * mutation_template_num_form(GPtrArray * mut_template)
@@ -222,6 +227,7 @@ void mutation_num_template_free(MutationNumTemplate * mut_num_template)
 
 static gboolean mutation_template_check_mutation(ASTNode * node, gpointer data)
 {
+    	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"milu_mutation_template_check_mutaiton.")  : 0 ;
 
 	GPtrArray * curr_mut_slot = g_ptr_array_new();
 
@@ -232,19 +238,18 @@ static gboolean mutation_template_check_mutation(ASTNode * node, gpointer data)
 		for (int j = 0; j< curr_opt->mutators->len; j++)
 		{
 			Mutator * curr_mut = g_ptr_array_index(curr_opt->mutators, j);
-
 			if (curr_mut->node_checking(node))
 			{
 				g_ptr_array_add(curr_mut_slot, (gpointer) curr_mut);
+				if (MILU_PRINT_MUT_TYPE)
+				printf("%d %d\n", i, curr_mut->size);
 			}
 		}
 	}
-
 	if (curr_mut_slot->len > 0)
 	{
 		g_ptr_array_add(curr_mutation_template, (gpointer) curr_mut_slot);
 		g_ptr_array_add(curr_mutation_locations, (gpointer) node);
 	}
-
 	return FALSE;
 }
