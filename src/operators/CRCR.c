@@ -37,7 +37,7 @@ Operator * get_CRCR_operator()
 	Operator * op = mutation_operator_new(name, info);
 
 	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_integer_constant_replacement());
-	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_float_constant_replacement());
+	//g_ptr_array_add(op->mutators, (gpointer)mutator_milu_float_constant_replacement());
 
 	return op;
 }
