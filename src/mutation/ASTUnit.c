@@ -844,7 +844,16 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 
 	case NodeKind_DeclRefExpr:
 		ASTNode_add_type(node, (NodeTypeKind) 1, NULL);
-		ASTNodeType_set_text(node, g_hash_table_lookup(localSymTable, node->text));
+		if(g_hash_table_lookup(localSymTable, node->text))
+		{
+			ASTNodeType_set_text(node, g_hash_table_lookup(localSymTable, node->text));
+		}
+		else
+		{
+			ASTNodeType_set_text(node, "unknown");
+
+		}
+
 		
 		clang_visitChildren(cursor, visit_ast, node);
 		

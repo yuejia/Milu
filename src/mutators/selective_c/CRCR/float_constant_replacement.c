@@ -42,7 +42,7 @@ Mutator * mutator_milu_float_constant_replacement()
 	mut->node_checking = & mutator_milu_float_constant_replacement_node_checking;
 	mut->mutate = & mutator_milu_float_constant_replacement_mutate;
 	mut->clean = & mutator_milu_float_constant_replacement_clean;
-	mut->size = 6;
+	mut->size = 5;
 	return mut;
 }
 
@@ -59,15 +59,24 @@ static gboolean mutator_milu_float_constant_replacement_mutate(ASTNode * node, g
 	switch(type)
 	{
 		case 1:
-			set_ASTNode_text (node, "-0.1");
+                        if(atof(node->text) != -0.1)
+			    set_ASTNode_text (node, "-0.1");
+                        else
+			    set_ASTNode_text (node, "-0.819");
 			return TRUE;
 
 		case 2:
-			set_ASTNode_text (node, "0");
+                        if(atof(node->text) != 0.0)
+			    set_ASTNode_text (node, "0.0");
+                        else
+			    set_ASTNode_text (node, "0.607");
 			return TRUE;
 
 		case 3:
-			set_ASTNode_text (node, "0.1");
+                        if(atof(node->text) != 0.1)
+			    set_ASTNode_text (node, "0.1");
+                        else
+                            set_ASTNode_text (node, "0.302");
 			return TRUE;
 		case 4:
 			set_ASTNode_text (node, g_strdup_printf("%f", atof(node->text) + 0.1));
@@ -75,9 +84,9 @@ static gboolean mutator_milu_float_constant_replacement_mutate(ASTNode * node, g
 		case 5:
 			set_ASTNode_text (node, g_strdup_printf("%f", atof(node->text) - 0.1));
 			return TRUE;
-		case 6:
-			set_ASTNode_text (node, g_strdup_printf("%f", atoi(node->text) * -1.0));
-			return TRUE;
+//		case 6:
+//			set_ASTNode_text (node, g_strdup_printf("%f", atoi(node->text) * -1.0));
+//			return TRUE;
 		default:
 			break;
 	}
