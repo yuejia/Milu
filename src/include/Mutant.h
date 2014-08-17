@@ -58,7 +58,7 @@ struct MiluMutant
 	gboolean compilable; /**< Is Mutant compilable. */
 	gboolean iskilled; /**< Is Mutant is killed. */
     gboolean isequivalent;  /**< Is Mutant is equivalent. */
-	gint * file_id;  /**< The file id. */
+	gint file_id;  /**< The file id. */
 	gchar * base_path;  /**< The file id. */
 	gchar * src_path;  /**< The source path. */
 	gchar * html_path;  /**< The html path. */
@@ -106,7 +106,7 @@ void mutants_save_id(GPtrArray * Muts, FILE * output);
 
 //void mutant_compile(gchar * cmd);
 //void mutant_run(gchar * bin);
-Mutant * mutant_new(MutationId * id, gint * file_id, gchar * base_path);
+Mutant * mutant_new(MutationId * id, gint file_id, gchar * base_path);
 GPtrArray * mutants_new(GPtrArray * ids, gchar * muts_path);
 void mutants_save(GPtrArray * muts);
 gchar * mutant_get_src_path(gchar * mut_path);

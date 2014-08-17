@@ -66,6 +66,7 @@ static void print_source_member_ref_expr(ASTNode * node, GString * buffer);
 static void	print_source_case_stmt(ASTNode * parent, GString * buffer);
 static void print_source_init_list_expr(ASTNode * node, GString * buffer);
 static void	print_source_while_stmt(ASTNode * parent, GString * buffer);
+static void	print_source_do_stmt(ASTNode * parent, GString * buffer);
 static void print_source_cstyle_cast_expr(ASTNode * parent, GString * buffer, gboolean is_stmt);
 static void	print_source_default_stmt(ASTNode * parent, GString * buffer);
 
@@ -1384,6 +1385,9 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		case NodeKind_WhileStmt:
 			print_source_while_stmt(node,buffer);
             break;
+		case NodeKind_DoStmt:
+			print_source_do_stmt(node,buffer);
+            break;
 		case NodeKind_DefaultStmt:
 		{
 			print_source_default_stmt(node,buffer);
@@ -1483,6 +1487,27 @@ static void	print_source_switch_stmt(ASTNode * parent, GString * buffer)
 	g_string_append_printf(buffer,"\n");
     html_lines++;
 
+}
+
+static void	print_source_do_stmt(ASTNode * parent, GString * buffer)
+{
+
+    html_check_mutantion_node(parent);
+	ASTNode * node = parent->children;
+
+	g_string_append_printf(buffer,"do ");
+
+    print_source_stmt(node, buffer);
+
+	//g_string_append_printf(buffer,"\n");
+	//html_lines++;
+
+    node=node->next_sibling;
+
+    g_string_append_printf(buffer,"while( ");
+    print_source_expr(node, buffer,0);
+	g_string_append_printf(buffer,");\n");
+    html_lines++;
 }
 
 static void	print_source_while_stmt(ASTNode * parent, GString * buffer)

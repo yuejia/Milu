@@ -62,7 +62,7 @@ static void clean_mutation(Mutant * mut)
 	}
 }
 
-Mutant * mutant_new(MutationId * id, gint * file_id, gchar * base_path)
+Mutant * mutant_new(MutationId * id, gint file_id, gchar * base_path)
 {
 	Mutant * mut = g_slice_new(Mutant);
 	mut->id = id;

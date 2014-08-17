@@ -297,6 +297,8 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	if(curr_type == NodeKind_FunctionDecl)
 	{
 		gchar * func_name = (gchar *)clang_getCString(cstr);
+    	        MILU_GLOBAL_VERBOSE ? g_log ("Milu-PF",G_LOG_LEVEL_MESSAGE,func_name)  : 0 ;
+                
 		if(is_current_functions_to_mutate(func_name))
 		{
 			parsing_in_func = TRUE;
@@ -833,6 +835,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	case NodeKind_FieldDecl:
 	case NodeKind_IfStmt:
 	case NodeKind_WhileStmt:
+	case NodeKind_DoStmt:
 	case NodeKind_ContinueStmt:
 	case NodeKind_ForStmt:
 	case NodeKind_ParenExpr:
