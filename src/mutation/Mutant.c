@@ -236,7 +236,7 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 		);
 		*/
 
-	g_string_printf(cmd,"");
+	g_string_printf(cmd,"%s","");
 
 	g_string_printf(cmd,"%s %s/%s -lm -o %s/%s",command, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
 //    printf("%s\n" , cmd->str);

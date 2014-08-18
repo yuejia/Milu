@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASTUnit.h"
 #include "Options.h"
 #include "Utility.h"
+#include <string.h>
 #include <glib.h>
 #include <stdlib.h>
 

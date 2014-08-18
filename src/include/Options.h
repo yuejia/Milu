@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <glib.h>
 #include <stdlib.h>
+#include "MultiProcessing.h"
 #include "Utility.h"
 
 

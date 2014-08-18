@@ -66,7 +66,7 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size);
 static void load_c_source_file(const gchar * path);
 static gboolean search_curr_source_file(gchar * text);
 static gchar * resolve_pointer(CXType type);
-static gboolean is_unary_token(gchar * token);
+static gboolean is_unary_token(const gchar * token);
 static gint get_unary_operator_id(CXToken * tokens ,unsigned tokens_size);
 static void clean_ast(ASTNode * root);
 static void fix_data_types_duplication();
@@ -298,6 +298,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	{
 		gchar * func_name = (gchar *)clang_getCString(cstr);
     	        MILU_GLOBAL_VERBOSE ? g_log ("Milu-PF",G_LOG_LEVEL_MESSAGE,func_name)  : 0 ;
+                
                 
 		if(is_current_functions_to_mutate(func_name))
 		{
@@ -842,6 +843,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 	case NodeKind_CallExpr :
 	case NodeKind_ConditionalOperator :
 	case NodeKind_InitListExpr :
+        case NodeKind_CompoundLiteralExpr:
 		clang_visitChildren(cursor, visit_ast, node);
 		break;
 
@@ -1150,7 +1152,7 @@ static gchar * resolve_pointer(CXType type)
     return g_string_free(pointer, FALSE);
 }
 
-static gboolean is_unary_token(gchar * token)
+static gboolean is_unary_token(const gchar * token)
 {
 	if(g_strcmp0(token, "++")==0)
 	    return TRUE;
@@ -1227,7 +1229,7 @@ static void add_original_non_mutation(ASTNode * ast)
 		//fflush(stdout);
 		if(child->line_start > curr_line)
 		{
-			g_string_printf(buffer,"");
+			g_string_printf(buffer,"%s", "");
 			for(int j = curr_line-1; j < child->line_start-1; j++)
 			{
 				g_string_append_printf(buffer,"%s\n",  *(inputs+j));
@@ -1254,7 +1256,7 @@ static void add_original_non_mutation(ASTNode * ast)
 
 	if(child->line_end+1 < flen)
 	{
-		g_string_printf(buffer,"");
+		g_string_printf(buffer,"%s", "");
 		for(int j = child->line_end; j < flen; j++)
 		{
 			g_string_append_printf(buffer,"%s\n",  *(inputs+j));
