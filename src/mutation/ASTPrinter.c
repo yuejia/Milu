@@ -1226,6 +1226,7 @@ static void	print_source_expr(ASTNode * node, GString * buffer, gboolean is_stmt
 	        }
 	default:
        g_printf("-%d %s\n", node->kind, node->text);
+        g_printf("%s \n", buffer->str);
         g_assert_not_reached();
 		break;
 	}
@@ -1532,10 +1533,17 @@ static void	print_source_for_stmt(ASTNode * parent, GString * buffer)
     html_check_mutantion_node(parent);
 	ASTNode * node = parent->children;
 	g_string_append_printf(buffer,"for ( ");
-    print_source_expr(node, buffer, 0);
 
-    node=node->next_sibling;
+if(ASTNode_get_children_number(parent) == 3 && g_strcmp0(node->text, "=") != 0)
+{
 	g_string_append_printf(buffer,"; ");
+}
+else
+{
+    print_source_expr(node, buffer, 0);
+    node=node->next_sibling;
+    g_string_append_printf(buffer,"; ");
+}
     print_source_expr(node, buffer, 0);
 
     node=node->next_sibling;
