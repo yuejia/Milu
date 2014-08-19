@@ -917,70 +917,75 @@ static void	print_source_return_stmt(ASTNode * parent, GString * buffer)
 static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
 {
     html_check_mutantion_node(parent);
-	ASTNode * node = parent->children;
+    ASTNode * node = parent->children;
     gboolean is_else = FALSE;
-	g_string_append_printf(buffer,"if ( ");
-	while(node)
-	{
-		if(ASTNode_get_children_number(parent) > 2 && ASTNode_is_last_child(parent,node))
-		{
-			g_string_append_printf(buffer,"else ");
+    g_string_append_printf(buffer,"if ( ");
+    while(node)
+    {
+        if(ASTNode_get_children_number(parent) > 2 && ASTNode_is_last_child(parent,node))
+        {
+            g_string_append_printf(buffer,"else ");
             is_else = TRUE;
-		}
+        }
         if(node == parent->children)
             print_source_expr(node, buffer, 0);
         else
         {
-		switch(node->kind)
-		{
-
-	case NodeKind_CompoundAssignOperator:
-		case NodeKind_BinaryOperator:
-		{
-			  if(!is_else)
-			            {
-			g_string_append_printf(buffer,")\n");
-			html_lines++;
-			            }
-			print_source_binary_operator(node, buffer, TRUE);
-
-			break;
-		}
-
-//TODO : potiential bug may need a statement cheking function
-		case NodeKind_ForStmt:
-		case NodeKind_CallExpr:
-		case NodeKind_ReturnStmt:
-		case NodeKind_IfStmt:
-		case NodeKind_SwitchStmt:
-		case NodeKind_ContinueStmt:
-		case NodeKind_CStyleCastExpr:
-		case NodeKind_CompoundStmt:
-		case NodeKind_BreakStmt:
-		case NodeKind_GotoStmt:
-        case NodeKind_ParenExpr: //added a expression  type
-		{
-            if(!is_else)
+            switch(node->kind)
             {
-			g_string_append_printf(buffer,") ");
+
+                case NodeKind_CompoundAssignOperator:
+                case NodeKind_BinaryOperator:
+                    {
+                        if(!is_else)
+                        {
+                            g_string_append_printf(buffer,")\n");
+                            html_lines++;
+                        }
+                        print_source_binary_operator(node, buffer, TRUE);
+
+                        break;
+                    }
+
+                    //TODO : potiential bug may need a statement cheking function
+                case NodeKind_ForStmt:
+                case NodeKind_CallExpr:
+                case NodeKind_ReturnStmt:
+                case NodeKind_IfStmt:
+                case NodeKind_SwitchStmt:
+                case NodeKind_ContinueStmt:
+                case NodeKind_CStyleCastExpr:
+                case NodeKind_CompoundStmt:
+                case NodeKind_BreakStmt:
+                case NodeKind_GotoStmt:
+                case NodeKind_ParenExpr: //added a expression  type
+                    {
+                        if(!is_else)
+                        {
+                            g_string_append_printf(buffer,") ");
+                        }
+                        print_source_stmt(node, buffer);
+                        break;
+
+                    }
+	        case NodeKind_UnaryOperator_Append:
+	        {
+		    print_source_unary_operator_append(node, buffer, TRUE);
+		    break;
+	        }
+
+                default:
+                    g_printf("%d\n", node->kind);
+                    g_assert_not_reached();
+                    html_lines++;
+                    break;
+
             }
-			print_source_stmt(node, buffer);
-			break;
-
-		}
-
-		default:
-            g_printf("%d\n", node->kind);
-			g_assert_not_reached();
-            html_lines++;
-			break;
-
-		}
         }
-		node = node->next_sibling;
-	}
-	g_string_append_printf(buffer,"\n");
-	html_lines++;
+        node = node->next_sibling;
+    }
+    g_string_append_printf(buffer,"\n");
+    html_lines++;
 
 }
 
@@ -1238,7 +1243,8 @@ static void	print_source_binary_operator(ASTNode * parent, GString * buffer, gbo
     html_check_mutantion_node(parent);
 	ASTNode * node = parent->children;
 
-	print_source_expr(node, buffer, is_stmt);
+	//print_source_expr(node, buffer, is_stmt);
+	print_source_expr(node, buffer, FALSE);
 
 	g_string_append_printf(buffer,"%s ", parent->text);
 	node = node->next_sibling;
@@ -1360,7 +1366,7 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		case NodeKind_DeclStmt:
 			print_source_decl_stmt(node, buffer);
 			break;
-	case NodeKind_CompoundAssignOperator:
+	        case NodeKind_CompoundAssignOperator:
 		case NodeKind_BinaryOperator:
 			print_source_binary_operator(node,buffer,TRUE);
 			break;
