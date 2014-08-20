@@ -1071,7 +1071,6 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
 	{
 		CXString token_cstr = clang_getTokenSpelling(*CurrTU,tokens[i]);
 		const char * curr_token = clang_getCString(token_cstr);
-                printf("-- %s\n", curr_token);
 
 		if (g_strcmp0(curr_token,")") ==0)
             skip_par++;
@@ -1117,7 +1116,6 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
         clang_disposeString(token_cstr);
     }
 
-    printf("----- take %s\n", big_op);
     return big_op;
 }
 
