@@ -967,6 +967,8 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
                 case NodeKind_BreakStmt:
                 case NodeKind_GotoStmt:
                 case NodeKind_ParenExpr: //added a expression  type
+                case NodeKind_DoStmt: //added a expression  type
+	        case NodeKind_UnaryOperator_Append:
                     {
                         if(!is_else)
                         {
@@ -976,11 +978,14 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
                         break;
 
                     }
+
+/*
 	        case NodeKind_UnaryOperator_Append:
 	        {
 		    print_source_unary_operator_append(node, buffer, TRUE);
 		    break;
 	        }
+*/
 
                 default:
                     g_printf("%d\n", node->kind);
@@ -1321,7 +1326,7 @@ static void	print_source_conditional_operator(ASTNode * parent, GString * buffer
 	node=node->next_sibling;
 
 	if(node)
-		print_source_expr(node, buffer, is_stmt);
+		print_source_expr(node, buffer, FALSE);
 
 	g_string_append_printf(buffer,": ");
 	node=node->next_sibling;
