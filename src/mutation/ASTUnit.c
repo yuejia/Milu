@@ -1065,18 +1065,25 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
 {
 	gchar * big_op = NULL;
 	gint big_weight = -819;
-    gint skip_par = 0;
+        gint skip_par = 0;
+        gint skip_spar = 0;
 	for (gint i = tokens_size-2; i >=0; i--)
 	{
 		CXString token_cstr = clang_getTokenSpelling(*CurrTU,tokens[i]);
 		const char * curr_token = clang_getCString(token_cstr);
+                printf("-- %s\n", curr_token);
 
 		if (g_strcmp0(curr_token,")") ==0)
             skip_par++;
 		if (g_strcmp0(curr_token,"(") ==0)
             skip_par--;
 
-		if(skip_par == 0)
+		if (g_strcmp0(curr_token,"]") ==0)
+            skip_spar++;
+		if (g_strcmp0(curr_token,"[") ==0)
+            skip_spar--;
+
+		if(skip_par == 0 && skip_spar == 0)
         {
             gint curr_token_weight = check_binary_op(curr_token);
             if(curr_token_weight)
@@ -1109,6 +1116,8 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
         }
         clang_disposeString(token_cstr);
     }
+
+    printf("----- take %s\n", big_op);
     return big_op;
 }
 

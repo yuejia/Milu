@@ -571,7 +571,15 @@ static void	print_source_var_decl(ASTNode * parent, GString * buffer, gboolean n
 				node = node->next_sibling	;
 			}
 
-				    if(node->kind != NodeKind_IntegerLiteral)
+                        if(node->kind == NodeKind_BinaryOperator)
+                        {
+				g_string_append_printf(buffer,"[ ");
+				print_source_binary_operator(node,buffer, FALSE);
+				g_string_append_printf(buffer,"] ");
+				node = node->next_sibling;
+                        }
+
+				    else if(node->kind != NodeKind_IntegerLiteral)
 					{
 						g_string_append_printf(buffer,"[ ]");
 					}
