@@ -219,8 +219,9 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 
 	if(driver)
 	{
-		g_string_printf(cmd,"cat %s >> %s/%s",driver, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
-	system(cmd->str);
+	    //bad format string bug g_string_printf(cmd,"cat %s >> %s/%s",driver, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
+	    g_string_printf(cmd,"cat %s >> %s/%s",driver, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current())  );
+	    system(cmd->str);
 	}
 //printf("%s\n",cmd->str);
 //	g_string_printf(cmd,"%s/%s", mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");

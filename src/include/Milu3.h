@@ -74,7 +74,7 @@ void milu_free();
  *
  *  \return A set of mutants. Use mutants_free() to free it.
  */
-GPtrArray * milu_generate_mutants_by_order(Project * project,gint order_begin, gint order_end);
+GPtrArray * milu_generate_mutants_by_order(const Project * project,gint order_begin, gint order_end);
 
 /**
  *  \brief Generate a set of mutants by a given order range.
@@ -148,7 +148,7 @@ void milu_save_mutants(GPtrArray * mutants);
  * \param output The output stream.
  *
  **/
-void milu_print_results(Project * project, GPtrArray * mutants, FILE * output);
+void milu_print_results(const Project * project, GPtrArray * mutants, FILE * output);
 
 
 /**
@@ -159,7 +159,7 @@ void milu_print_results(Project * project, GPtrArray * mutants, FILE * output);
  * \param output The output stream.
  *
  **/
-void milu_print_killing_results(Project * project, GPtrArray * mutants, FILE * output);
+void milu_print_killing_results(const Project * project, GPtrArray * mutants, FILE * output);
 
 /**
  * \brief Compile mutants.

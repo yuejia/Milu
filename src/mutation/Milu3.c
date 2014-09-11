@@ -107,7 +107,7 @@ void milu_run_mutation_testing(Project * project, GPtrArray * mutants, StrategyT
 	}
 }
 
-void milu_print_results(Project * project, GPtrArray * mutants, FILE * output)
+void milu_print_results(const Project * project, GPtrArray * mutants, FILE * output)
 {
 	g_assert(project && output && mutants && "Invalid arguments!");
 	g_assert(mutants->len > 0 && "Invalid arguments!");
@@ -116,7 +116,7 @@ void milu_print_results(Project * project, GPtrArray * mutants, FILE * output)
 	printf("MS: %d, %f\n", mutants->len, mutants_cal_mutation_score(mutants));
 }
 
-void milu_print_killing_results(Project * project, GPtrArray * mutants, FILE * output)
+void milu_print_killing_results(const Project * project, GPtrArray * mutants, FILE * output)
 {
 	for (gint i = 0 ; i < mutants->len; i ++)
 	{
@@ -154,7 +154,7 @@ GPtrArray * milu_restore_mutants_from_mid_file(Project * project, gchar * mid_fi
 	return muts;
 }
 
-GPtrArray * milu_generate_mutants_by_order(Project * project, gint order_begin, gint order_end)
+GPtrArray * milu_generate_mutants_by_order(const Project * project, gint order_begin, gint order_end)
 {
 	g_assert(project && "Invalid project!");
 	g_assert(order_begin > 0 && order_end > 0 && "Invalid order inputs!");
