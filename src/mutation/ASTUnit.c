@@ -28,6 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "ASTUnit.h"
+#include "ASTPrinter.h"
+
 
 static CXTranslationUnit * CurrTU  = NULL;
 static ASTUnit * CurrASTUnit = NULL;

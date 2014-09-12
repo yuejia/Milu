@@ -169,6 +169,23 @@ void milu_print_killing_results(const Project * project, GPtrArray * mutants, FI
  **/
 void milu_compile_mutants(GPtrArray * mutants);
 
+/**
+ * \brief Apple TCE to check equivalent mutants.
+ *
+ * \param The given set of mutants to check.
+ * \param The original mut.
+ *
+ **/
+void milu_check_equivalent_mutants(GPtrArray * mutants, Mutant * std);
+
+/**
+ * \brief Apple TCE to check duplicated mutants.
+ *
+ * \param The given set of mutants to check.
+ *
+ **/
+void milu_check_duplicated_mutants(GPtrArray * mutants);
+
 
 /**
  * \brief Search higher order mutants

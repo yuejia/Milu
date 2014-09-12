@@ -61,10 +61,12 @@ gboolean MILU_SAVE_KILLING_RESULT = FALSE;
 gboolean MILU_AUSTIN_TRANSFORM = FALSE;
 gboolean MILU_UNIT_TEST = FALSE;
 gboolean MILU_KILLING_RESULT= FALSE;
+gboolean MILU_TCE_OPTIMISATION= FALSE;
 
 static  GOptionEntry entries[] =
 {
   { "verbose", 'v', 0, G_OPTION_ARG_NONE, &MILU_GLOBAL_VERBOSE, "Be verbose.", NULL },
+  { "TCE", 0, 0, G_OPTION_ARG_NONE, &MILU_TCE_OPTIMISATION, "Apply TCE Otimisation.", NULL },
   { "print-mutants-type", 0, 0, G_OPTION_ARG_NONE, &MILU_PRINT_MUT_TYPE, "Print a list of mutation operators applied.", NULL },
   { "unit-test", 'u', 0, G_OPTION_ARG_NONE, &MILU_UNIT_TEST, "Unit test case.", NULL },
   { "killing-result", 'k', 0, G_OPTION_ARG_NONE, &MILU_KILLING_RESULT, "Get Milu Killing results.", NULL },

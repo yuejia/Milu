@@ -49,6 +49,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 extern gboolean MILU_GLOBAL_VERBOSE;
 
+/**
+ * \brief Set TCE optimisation.
+ */
+extern gboolean MILU_TCE_OPTIMISATION;
+
 
 
 /**

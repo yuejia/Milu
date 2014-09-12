@@ -248,7 +248,6 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 					NULL //GError **error
 			);
 
-
 	g_string_free(cmd, TRUE);
 
 }
@@ -354,7 +353,51 @@ gboolean mutant_is_compilable(Mutant * mut)
 
 gboolean mutant_is_equivalent(Mutant * mut)
 {
-	return mut->isequivalent;
+    return mut->isequivalent;
+}
+
+void mutant_set_equivalence(Mutant * mut)
+{
+    mut->isequivalent = TRUE;
+}
+
+gboolean mutant_check_equivalence(Mutant * mut, Mutant * std)
+{
+    GString * cmd = g_string_new("");
+    gchar * mut_output = NULL;
+
+    g_string_printf(cmd,"%s/%s", mut->bin_path, "mut.exe");
+    if (!g_file_test (cmd->str, G_FILE_TEST_EXISTS))
+    {
+        mut->compilable = FALSE;
+    }
+    else
+    {
+        g_string_printf(cmd,"diff --binary %s/mut.exe %s/mut.exe", mut->bin_path, std->bin_path);
+
+        g_spawn_command_line_sync (cmd->str,
+                &mut_output, //gchar **standard_output,
+                NULL, //gchar **standard_error,
+                NULL, //gint *exit_status,
+                NULL //GError **error
+                );
+
+        //printf("--diff: %s\n", mut_output);
+        if (g_strcmp0(mut_output, "") == 0)
+        {
+            mutant_set_equivalence(mut);
+            //printf("--diff: %s\n", "EQ");
+        }
+/*
+        else
+        {
+            //printf("--diff: %s\n", "NEQ");
+        }
+*/
+    }
+
+        if (mut_output) g_free(mut_output);
+        g_string_free(cmd, TRUE);
 }
 
 gboolean mutant_check_compiled(Mutant * mut)
@@ -369,6 +412,8 @@ gboolean mutant_check_compiled(Mutant * mut)
      g_string_free(cmd, TRUE);
 
 }
+
+
 gboolean mutant_has_results(Mutant * mut)
 {
     if(mut->results == NULL)

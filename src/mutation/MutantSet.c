@@ -68,6 +68,16 @@ void mutants_compile(GPtrArray * muts)
 	}
 }
 
+void mutants_check_equivalence(GPtrArray * muts, Mutant * std)
+{
+	Mutant * curr_mut = NULL;
+	for(gint i = 0 ; i < muts->len ; i++)
+	{
+		curr_mut = g_ptr_array_index(muts, i);
+		mutant_check_equivalence(curr_mut, std);
+	}
+}
+
 
 static void mutants_compile_(GPtrArray * muts, gchar * command, gchar * driver) // Depreciate
 {
@@ -79,6 +89,33 @@ static void mutants_compile_(GPtrArray * muts, gchar * command, gchar * driver) 
 	}
 }
 
+gint mutants_get_compiled_number(GPtrArray * mutants)
+{
+    Mutant * curr_mut = NULL;
+    gint num_non_eq = 0;
+
+    for (gint i = 0; i < mutants->len; i++)
+    {
+        curr_mut = g_ptr_array_index(mutants, i);
+        if (mutant_is_compilable(curr_mut))
+            num_non_eq++;
+    }
+    return num_non_eq;
+}
+
+gint mutants_get_equivalent_number(GPtrArray * mutants)
+{
+    Mutant * curr_mut = NULL;
+    gint num_non_eq = 0;
+
+    for (gint i = 0; i < mutants->len; i++)
+    {
+        curr_mut = g_ptr_array_index(mutants, i);
+        if (mutant_is_equivalent(curr_mut))
+            num_non_eq++;
+    }
+    return num_non_eq;
+}
 
 gint mutants_get_non_equivalent_number(GPtrArray * mutants)
 {
@@ -201,6 +238,7 @@ void mutants_check_compiled(GPtrArray * muts)
         mutant_check_compiled(curr_mut);
     }
 }
+
 
 void mutants_save_id(GPtrArray * muts, FILE * output)
 {

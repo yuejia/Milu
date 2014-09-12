@@ -117,6 +117,7 @@ void mutants_print(GPtrArray * muts, FILE * output);
 
 void mutant_compile(Mutant * mut, gchar * command, gchar * driver);
 void mutants_compile(GPtrArray * muts);
+void mutants_check_equivalence(GPtrArray * muts, Mutant * std);
 
 gboolean mutant_run(Mutant * mut, Mutant * std, gchar * test);
 Mutant * mutant_new_original(gchar * base_path);
@@ -136,6 +137,7 @@ gboolean mutant_has_results(Mutant * mut);
 void mutants_results_clean(GPtrArray * mutants);
 
 void mutant_results_set_kill(Mutant * mut);
+void mutant_set_equivalence(Mutant * mut);
 void mutant_results_set_not_kill(Mutant * mut);
 
 void mutant_results_save(Mutant * mut, FILE * output);
@@ -147,11 +149,16 @@ void mutants_free(GPtrArray * mutants);
 
 
 gboolean mutant_check_compiled(Mutant * mut);
+gboolean mutant_check_equivalence(Mutant * mut, Mutant * std);
 void mutants_check_compiled(GPtrArray * muts);
 void mutants_append_mutants(GPtrArray * mutantsA, GPtrArray * mutantsB);
 
 void mutant_evaluate_subsuming_fitness(Mutant * mut, GPtrArray * foms);
 void mutant_evaluate_strongly_subsuming_fitness(Mutant * mut, GPtrArray * foms);
+
+
+gint mutants_get_equivalent_number(GPtrArray * mutants);
+gint mutants_get_compiled_number(GPtrArray * mutants);
 #endif /* MUTANT_H_ */
 
 /**@}*/

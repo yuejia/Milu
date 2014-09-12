@@ -87,6 +87,19 @@ void milu_compile_mutants(GPtrArray * mutants)
 	// mutants_compile(mutants, MILU_GLOBAL_COMPILER, project->test_driver_path);
 }
 
+void milu_check_equivalent_mutants(GPtrArray * mutants, Mutant * std)
+{
+    //fix for parallel
+    mutants_check_equivalence(mutants, std);
+//	milu_multi_process_mutants(mutants, &mutants_check_equivalence);
+}
+
+void milu_check_duplicated_mutants(GPtrArray * mutants)
+{
+        //	milu_multi_process_mutants(mutants, &mutants_compile);
+	// mutants_compile(mutants, MILU_GLOBAL_COMPILER, project->test_driver_path);
+}
+
 
 void milu_run_mutation_testing(Project * project, GPtrArray * mutants, StrategyType strategy_type)
 {
