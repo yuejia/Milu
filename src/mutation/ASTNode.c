@@ -931,3 +931,15 @@ ASTNode * ASTNode_get_root(ASTNode * node)
 	}
 	return root;
 }
+
+gchar * ASTNode_get_func(ASTNode * node)
+{
+	ASTNode * root = node;
+	while(root->parent)
+	{
+		root = root->parent ;
+                if(root->kind == NodeKind_FunctionDecl)
+                    return root->text;
+	}
+	return NULL;
+}

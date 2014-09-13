@@ -79,6 +79,7 @@ Mutant * mutant_new(MutationId * id, gint file_id, gchar * base_path)
     mut->iskilled = FALSE;
     mut->compilable = TRUE;
     mut->isequivalent = FALSE;
+    mut->isduplicated= FALSE;
 
     mut->results = NULL;//g_array_new(FALSE, FALSE, sizeof (guint8));
     mut->foms = g_ptr_array_new();
@@ -239,14 +240,16 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 
 	g_string_printf(cmd,"%s","");
 
-	g_string_printf(cmd,"%s %s/%s -lm -o %s/%s",command, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
-//    printf("%s\n" , cmd->str);
+        g_string_printf(cmd,"%s %s/%s -lm -o %s/%s",command, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
+        gchar * err;
+
 		g_spawn_command_line_sync (cmd->str,
 					NULL, //gchar **standard_output,
-					NULL, //gchar **standard_error,
+					&err,//NULL, //gchar **standard_error,
 					NULL, //gint *exit_status,
 					NULL //GError **error
 			);
+        free(err);
 
 	g_string_free(cmd, TRUE);
 
@@ -340,6 +343,11 @@ void mutant_set_killed(Mutant * mut)
     mut->iskilled = TRUE;
 }
 
+void mutant_set_duplicated(Mutant * mut)
+{
+    mut->isduplicated = TRUE;
+}
+
 
 gboolean mutant_is_killed(Mutant * mut)
 {
@@ -349,6 +357,11 @@ gboolean mutant_is_killed(Mutant * mut)
 gboolean mutant_is_compilable(Mutant * mut)
 {
     return mut->compilable;
+}
+
+gboolean mutant_is_duplicated(Mutant * mut)
+{
+    return mut->isduplicated;
 }
 
 gboolean mutant_is_equivalent(Mutant * mut)
@@ -361,6 +374,39 @@ void mutant_set_equivalence(Mutant * mut)
     mut->isequivalent = TRUE;
 }
 
+gboolean mutant_check_duplication(Mutant * curr_mut, Mutant * next_mut)
+{
+    GString * cmd = g_string_new("");
+    gchar * mut_output = NULL;
+
+    if (curr_mut->compilable && next_mut->compilable)
+    {
+        g_string_printf(cmd,"diff --binary %s/mut.exe %s/mut.exe", curr_mut->bin_path, next_mut->bin_path);
+
+        g_spawn_command_line_sync (cmd->str,
+                &mut_output, //gchar **standard_output,
+                NULL, //gchar **standard_error,
+                NULL, //gint *exit_status,
+                NULL //GError **error
+                );
+
+        //printf("--diff: %s\n", mut_output);
+        if (g_strcmp0(mut_output, "") == 0)
+        {
+            mutant_set_duplicated(curr_mut);
+            //printf("--diff: %s\n", "EQ");
+        }
+/*
+        else
+        {
+            //printf("--diff: %s\n", "NEQ");
+        }
+*/
+    }
+
+        if (mut_output) g_free(mut_output);
+        g_string_free(cmd, TRUE);
+}
 gboolean mutant_check_equivalence(Mutant * mut, Mutant * std)
 {
     GString * cmd = g_string_new("");

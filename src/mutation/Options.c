@@ -50,6 +50,7 @@ static gchar * MILU_MID_PATH = NULL;
 static gint MILU_MUTANT_RAND_LIMIT = 1000;
 static gchar * MILU_EXEC_STRATEGY = NULL;
 static gchar * MILU_FUNC_LIST_PATH = NULL;
+static gchar * MILU_FUNC_NAME= NULL;
 static gchar * MILU_TAG_LIST_PATH = NULL;
 static gboolean MILU_HTML_VIEW = FALSE;
 static gboolean MILU_SAVE_MID = FALSE;
@@ -87,6 +88,7 @@ static  GOptionEntry entries[] =
   { "exec-strategy", 0, 0, G_OPTION_ARG_STRING, &MILU_EXEC_STRATEGY, "Set the strategy to execute mutants.", "[mut-1st, test-1st, mut-1st-full, test-1st-full]"},
   { "rand-limit", 0,0, G_OPTION_ARG_INT, &MILU_MUTANT_RAND_LIMIT, "Set the max number of mutants to generate in random mode. The default value is 1000.", "N"},
   { "func-list", 'f',0, G_OPTION_ARG_STRING, &MILU_FUNC_LIST_PATH, "Set the path to a file, selecting a set of functions to mutate.", "path"},
+  { "func-name", 0,0, G_OPTION_ARG_STRING, &MILU_FUNC_NAME, "Set a function to mutate.", "function name"},
   { "tag-list", 0,0, G_OPTION_ARG_STRING, &MILU_TAG_LIST_PATH, "This is a temp function, set the path to a file, selecting a set of external declarations to reduce the tree size.", "path"},
   { "html", 'h',0, G_OPTION_ARG_NONE, &MILU_HTML_VIEW, "Generate a simple html mutant viewer.", NULL},
   { "mid", 'i',0, G_OPTION_ARG_NONE, &MILU_SAVE_MID, "Generate a Mid file for the current set of mutants.", NULL},
@@ -172,6 +174,8 @@ void milu_options_free()
     g_free(MILU_EXEC_STRATEGY);
     g_free(MILU_MUT_OPERATORS_PATH);
     g_free(MILU_SEARCH_STRATEGY);
+    if (MILU_FUNC_NAME)
+        g_free(MILU_FUNC_NAME);
 }
 
 gchar * milu_options_get_test_input_path()
@@ -248,6 +252,11 @@ gchar * milu_options_get_func_list_path()
     return MILU_FUNC_LIST_PATH;
 }
 
+gchar * milu_options_get_func_name()
+{
+    return MILU_FUNC_NAME;
+}
+
 gchar * milu_options_get_tag_list_path()
 {
     return MILU_TAG_LIST_PATH;
@@ -319,7 +328,6 @@ gboolean milu_options_not_save_mutants()
 {
 	return  MILU_NOT_SAVE_MUT;
 }
-
 
 gboolean milu_options_save_killing_result()
 {

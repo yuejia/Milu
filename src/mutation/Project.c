@@ -209,6 +209,7 @@ void milu_project_load_mut_operators_settings (Project * project, const gchar * 
 void milu_project_load_function_settings(Project * project, const gchar * func_path)
 {
     g_assert(project && "Invalid porject!");
+    gchar * func_name = milu_options_get_func_name();
 
     if (func_path != NULL)
     {
@@ -238,6 +239,35 @@ void milu_project_load_function_settings(Project * project, const gchar * func_p
     		}
     }
 
+    else if ( func_name != NULL )
+    {
+    		GPtrArray * func_text = g_ptr_array_new();
+
+                gchar * tmp_input =  g_string_chunk_insert (MiluStringPool, func_name);
+                if (tmp_input != NULL)
+                g_ptr_array_add(func_text, tmp_input);
+
+    		for(gint i = 0 ; i < project->func_nodes->len; i++)
+    		{
+    			gboolean found = FALSE;
+    			for(gint j = 0 ; j < func_text->len; j++)
+    			{
+    				gchar * func_name = g_ptr_array_index(func_text, j);
+    				ASTNode * tmp_node = g_ptr_array_index(project->func_nodes, i);
+
+    				if(g_strcmp0(func_name, tmp_node->text)==0)
+    				{
+    					found = TRUE;
+    					break;
+    				}
+    			}
+    			if(!found)
+    			{
+    				g_ptr_array_remove_index(project->func_nodes, i);
+    				i--;
+    			}
+    		}
+    }
 }
 
 void milu_project_save_mid(Project * project, GPtrArray * mutants)

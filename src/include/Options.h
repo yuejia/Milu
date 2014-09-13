@@ -120,6 +120,11 @@ gint  milu_options_get_rand_limit_number();
 gchar * milu_options_get_func_list_path();
 
 /**
+ * \brief Return name of the selected function.
+ **/
+gchar * milu_options_get_func_name();
+
+/**
  * \brief Return the path of selected mutation operator.
  **/
 gchar * milu_options_get_mut_operators_path();

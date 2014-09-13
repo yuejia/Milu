@@ -748,6 +748,15 @@ ASTNode * ASTNode_get_root(ASTNode * node);
 
 
  /**
+  * \brief Get current function node
+  *
+  * \param node The given ASTNode node.
+  *
+  * \return the root node.
+  **/
+gchar * ASTNode_get_func(ASTNode * node);
+
+ /**
   * \brief Get clean the node link
   *
   * \param node The given ASTNode node.

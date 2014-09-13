@@ -58,16 +58,17 @@ struct MiluMutant
 	MutationId * id; /**< The Mutation Id. */
 	gboolean compilable; /**< Is Mutant compilable. */
 	gboolean iskilled; /**< Is Mutant is killed. */
-    gboolean isequivalent;  /**< Is Mutant is equivalent. */
+        gboolean isequivalent;  /**< Is Mutant is equivalent. */
+        gboolean isduplicated;  /**< Is Mutant is duplicated. */
 	gint file_id;  /**< The file id. */
 	gchar * base_path;  /**< The file id. */
 	gchar * src_path;  /**< The source path. */
 	gchar * html_path;  /**< The html path. */
 	gchar * bin_path;   /**< The binary path. */
 	gchar * output_path;   /**< The output path. */
-    GArray * results;   /**< The results. */
-    GPtrArray * foms;  /**< The foms constructing HOMs */
-    gdouble fitness; /** < Fitness value */
+        GArray * results;   /**< The results. */
+        GPtrArray * foms;  /**< The foms constructing HOMs */
+        gdouble fitness; /** < Fitness value */
 
 		// old
 //	gchar * path;
@@ -118,15 +119,18 @@ void mutants_print(GPtrArray * muts, FILE * output);
 void mutant_compile(Mutant * mut, gchar * command, gchar * driver);
 void mutants_compile(GPtrArray * muts);
 void mutants_check_equivalence(GPtrArray * muts, Mutant * std);
+void mutants_check_duplication(GPtrArray * muts);
 
 gboolean mutant_run(Mutant * mut, Mutant * std, gchar * test);
 Mutant * mutant_new_original(gchar * base_path);
 void mutant_set_killed(Mutant * mut);
+void mutant_set_duplicated(Mutant * mut);
 
 
 gboolean mutant_is_killed(Mutant * mut);
 gboolean mutant_is_compilable(Mutant * mut);
 gboolean mutant_is_equivalent(Mutant * mut);
+gboolean mutant_is_duplicated(Mutant * mut);
 
 gfloat mutants_cal_mutation_score(GPtrArray * mutants);
 gint mutants_get_killed_number(GPtrArray * mutants);
@@ -159,6 +163,7 @@ void mutant_evaluate_strongly_subsuming_fitness(Mutant * mut, GPtrArray * foms);
 
 gint mutants_get_equivalent_number(GPtrArray * mutants);
 gint mutants_get_compiled_number(GPtrArray * mutants);
+gint mutants_get_duplicated_number(GPtrArray * mutants);
 #endif /* MUTANT_H_ */
 
 /**@}*/

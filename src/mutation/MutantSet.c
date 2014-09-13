@@ -31,6 +31,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static void mutants_compile_(GPtrArray * muts, gchar * command, gchar * driver);
 
+extern gchar * mutation_template_check_function(gint);
+
 GPtrArray * mutants_new(GPtrArray * ids, gchar * muts_path)
 {
 	GPtrArray * mutants = g_ptr_array_new();
@@ -78,6 +80,40 @@ void mutants_check_equivalence(GPtrArray * muts, Mutant * std)
 	}
 }
 
+void mutants_check_duplication(GPtrArray * muts)
+{
+	Mutant * curr_mut = NULL;
+	Mutant * next_mut = NULL;
+	for(gint i = 0 ; i < muts->len ; i++)
+	{
+	    curr_mut = g_ptr_array_index(muts, i);
+            gint curr_loc = 0;  
+            gint curr_i = 0;
+            curr_loc = g_array_index(curr_mut->id, gint, curr_i);
+            gchar * curr_func = mutation_template_check_function(curr_loc);
+
+            if (!mutant_is_equivalent(curr_mut) && mutant_is_compilable(curr_mut))
+            {
+	        for(gint j = i+1 ; j < muts->len ; j++)
+	        {
+	            next_mut = g_ptr_array_index(muts, j);
+                    gint next_loc = 0;  
+                    gint next_i = 0;
+                    next_loc = g_array_index(next_mut->id, gint, next_i);
+
+                    gchar * next_func = mutation_template_check_function(curr_loc);
+
+                    if (curr_func == next_func)
+                    {       
+                        if(!mutant_is_equivalent(next_mut) && mutant_is_compilable(next_mut) && !mutant_is_duplicated(next_mut))
+                        mutant_check_duplication(curr_mut,next_mut); 
+                    }
+
+                }
+            }
+
+	}
+}
 
 static void mutants_compile_(GPtrArray * muts, gchar * command, gchar * driver) // Depreciate
 {
@@ -112,6 +148,20 @@ gint mutants_get_equivalent_number(GPtrArray * mutants)
     {
         curr_mut = g_ptr_array_index(mutants, i);
         if (mutant_is_equivalent(curr_mut))
+            num_non_eq++;
+    }
+    return num_non_eq;
+}
+
+gint mutants_get_duplicated_number(GPtrArray * mutants)
+{
+    Mutant * curr_mut = NULL;
+    gint num_non_eq = 0;
+
+    for (gint i = 0; i < mutants->len; i++)
+    {
+        curr_mut = g_ptr_array_index(mutants, i);
+        if (mutant_is_duplicated(curr_mut))
             num_non_eq++;
     }
     return num_non_eq;

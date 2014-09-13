@@ -139,7 +139,6 @@ GPtrArray * mutation_template_generate_mutants(GArray * num_template, gint order
     /*
 	GPtrArray * fom_ids = mutation_ids_get_1st_order(num_template);
 	GPtrArray * curr_mids = fom_ids;
-
 	for (gint i = 2; i <= order; i++ )
 	{
 	     GPtrArray * prev_mids = curr_mids;
@@ -179,13 +178,20 @@ void mutation_template_clean_mutation(gint loc, gint id)
 		}
 }
 
+gchar * mutation_template_check_function(gint loc)
+{
+    ASTNode * curr_node = g_ptr_array_index(curr_mutation_locations, loc);
+    return ASTNode_get_func(curr_node); 
+}
+
+
 void mutation_template_apply_mutation(gint loc, gint id)
 {
-	GPtrArray * curr_mutators = g_ptr_array_index(curr_mutation_template, loc);
-	ASTNode * curr_node = g_ptr_array_index(curr_mutation_locations, loc);
+    GPtrArray * curr_mutators = g_ptr_array_index(curr_mutation_template, loc);
+    ASTNode * curr_node = g_ptr_array_index(curr_mutation_locations, loc);
     curr_node->is_mutant = TRUE;
 
-	gint curr_size = 0;
+    gint curr_size = 0;
 
 	for (int j = 0; j < curr_mutators->len; j++)
 	{
