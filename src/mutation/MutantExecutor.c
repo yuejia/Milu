@@ -57,7 +57,7 @@ static void execution_strategy_mutant_first_full (GPtrArray * mutants, Mutant * 
 	mutants_results_clean(mutants);
 	for (gint i = 0 ; i < mutants->len; i++)
 	{
-		g_printf("%d out of %d are complete.\n", i, mutants->len);
+//		g_printf("%d out of %d are complete.\n", i, mutants->len);
 		Mutant * curr_mut = g_ptr_array_index(mutants, i);
 		for (gint j = 0 ; j < tests->len; j++)
 		{
