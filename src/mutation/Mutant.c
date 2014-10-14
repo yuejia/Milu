@@ -224,7 +224,6 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 	    g_string_printf(cmd,"cat %s >> %s/%s",driver, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current())  );
 	    system(cmd->str);
 	}
-//printf("%s\n",cmd->str);
 //	g_string_printf(cmd,"%s/%s", mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
 
 //	ff = fopen("driver")
@@ -241,6 +240,11 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 	g_string_printf(cmd,"%s","");
 
         g_string_printf(cmd,"%s %s/%s -lm -o %s/%s",command, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
+//printf("--%s\n",cmd->str);
+//fflush(stdout);
+
+//g_log ("Milu",G_LOG_LEVEL_ERROR,cmd->str) ;
+
         gchar * err;
 
 		g_spawn_command_line_sync (cmd->str,

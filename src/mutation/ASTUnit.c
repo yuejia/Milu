@@ -1031,11 +1031,14 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
                                 {
                                     CXString token_cstri = clang_getTokenSpelling(*CurrTU,tokens[i]);
                                     const char * curr_tokeni = clang_getCString(token_cstri);
+ //                                   g_log("-- sizeof: %s\n", G_LOG_LEVEL_WARNING, "%s" ,curr_tokeni);
+                                    
                         
             
                                     if(
                                         g_strcmp0(curr_tokeni, "+") == 0 ||
-                                        g_strcmp0(curr_tokeni, "-") == 0 ||
+                                        //comment out for a GSL exp, may need to double check YJ
+//                                        g_strcmp0(curr_tokeni, "-") == 0 ||
 //                                          g_strcmp0(curr_tokeni, "*") == 0 ||
                                         g_strcmp0(curr_tokeni, "/") == 0 ||
                                         g_strcmp0(curr_tokeni, "=") == 0 ||
@@ -1060,7 +1063,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
                                 }
 
 			// switch off the warning of testing
-			g_log("Parsing warning",G_LOG_LEVEL_WARNING, "Find sizeof:  %s ", tmp_string->str);
+//			g_log("Parsing warning",G_LOG_LEVEL_WARNING, "Find sizeof:  %s ", tmp_string->str);
 			ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
 
 			}
