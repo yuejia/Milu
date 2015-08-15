@@ -36,6 +36,12 @@ NB: src.c need to be processed by gcc -E, func.txt contains a list of names of t
 
 Before to use the examples, you should compile the code. When you compile the code, a folder "bin" will be created. After that you can run the examples.
 
+To run:
+
+```sh
+$ sh run.sh
+```
+
 ## Acknowledgement
 
 This project was supported by the EPSRC grant, EP/D050863(SEBASE) and
