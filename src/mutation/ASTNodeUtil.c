@@ -419,3 +419,87 @@ ASTNode * ASTNode_new_empty_function_node(gchar * func_name, ASTNode * params )
 	return func_node;
 
 }
+
+gboolean is_ASTNode_null_assignment(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_assign_op(node)){
+		child = ASTNode_get_nth_child(node, 2);
+		if(child && is_ASTNode_has_kind(child, NodeKind_UnexposedExpr)){
+			child=child->children;
+			if(child){
+				// it could have ParenExpr or not
+				if(is_ASTNode_has_kind(child, NodeKind_ParenExpr)){
+					child=child->children;
+					if(!child){
+						return FALSE;
+					}
+				}
+				if(is_ASTNode_has_kind(child, NodeKind_CStyleCastExpr)){
+					child=child->children;
+					if(child && is_ASTNode_has_kind(child, NodeKind_MiluSource) && is_ASTNode_has_text(child, " void *")){
+						child=child->next_sibling;
+						if(child && is_ASTNode_has_kind(child, NodeKind_IntegerLiteral) && is_ASTNode_has_text(child, "0")){
+							return TRUE;
+						}
+					}
+				}
+			}
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_calloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_UnexposedExpr) && is_ASTNode_has_text(node, "calloc")){
+		child=node->children;
+		if(is_ASTNode_has_kind(node, NodeKind_CallExpr) && is_ASTNode_has_text(node, "calloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_malloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_UnexposedExpr) && is_ASTNode_has_text(node, "malloc")){
+		child=node->children;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "malloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+ASTNode * ASTNode_new_null_pointer_node()
+{
+	ASTNode * unexposed_node = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * cast_node = ASTNode_new_with_parent(unexposed_node, NodeKind_CStyleCastExpr, "", NULL);
+	ASTNode * void_node = ASTNode_new_with_parent(cast_node, NodeKind_MiluSource, " void *", NULL);
+	ASTNode * zero_node = ASTNode_new_with_parent(cast_node, NodeKind_IntegerLiteral, "0", NULL);
+	return unexposed_node;
+}
+
+gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace)
+{
+	if(ori->prev_sibling){
+		ori->prev_sibling->next_sibling=replace;
+	}
+	else if(ori->parent){
+		ori->parent->children=replace;
+	}
+	if(ori->next_sibling){
+		ori->next_sibling->prev_sibling=replace;
+	}
+	replace->parent=ori->parent;
+	replace->prev_sibling=ori->prev_sibling;
+	replace->next_sibling=ori->next_sibling;
+	ori->parent=NULL;
+	ori->children=NULL;
+	ori->prev_sibling=NULL;
+	ori->next_sibling=NULL;
+	return TRUE;
+}

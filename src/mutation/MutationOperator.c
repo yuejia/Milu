@@ -144,6 +144,14 @@ GPtrArray * mutation_operators_load(const gchar * mut_op_path)
               {
               	g_ptr_array_add(operators, (gpointer)get_Austin_CRCR_operator());
               }
+            else if(g_strcmp0("RMNA", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_RMNA_operator());
+            }
+            else if(g_strcmp0("REDAWN", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REDAWN_operator());
+            }
             else
             {
             	g_assert_not_reached();

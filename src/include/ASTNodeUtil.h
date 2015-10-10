@@ -541,6 +541,50 @@ ASTNode * ASTNode_new_parm_decl_node(gchar * name, NodeTypeKind * type);
  **/
 ASTNode * ASTNode_new_integer_literal_node( gchar * value);
 
+/**
+ * \brief Check if the given node is the root of a null assignment
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a null assignment.
+ **/
+gboolean is_ASTNode_null_assignment(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a calloc call
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a calloc call.
+ **/
+gboolean is_ASTNode_calloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a calloc call
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a calloc call.
+ **/
+gboolean is_ASTNode_malloc_call(const ASTNode * node);
+
+/**
+ * \brief Create a subtree represents NULL
+ *
+ * \return Root node of a subtree representing NULL.
+ **/
+ASTNode * ASTNode_new_null_pointer_node();
+
+/**
+ * \brief Check if the given node is the root of a calloc call
+ *
+ * \ori The root of the original subtree.
+ * \replace The root of the replacement tree.
+ *
+ * \return TRUE if the given node is the root of a calloc call.
+ **/
+gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace);
+
 #endif /* ASTNODEUTIL_H_ */
 
 /**@}*/
