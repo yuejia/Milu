@@ -34,6 +34,8 @@ static gboolean mutator_milu_replace_malloc_with_null_node_checking(ASTNode *);
 static gboolean mutator_milu_replace_malloc_with_null_clean(ASTNode * node, gint type);
 static gboolean mutator_milu_replace_malloc_with_null_mutate(ASTNode * node, gint type);
 
+static ASTNode * tmpNode;
+static gint tmpIndex;
 
 Mutator * mutator_milu_replace_malloc_with_null()
 {
@@ -48,18 +50,29 @@ Mutator * mutator_milu_replace_malloc_with_null()
 
 static gboolean mutator_milu_replace_malloc_with_null_node_checking(ASTNode * node)
 {
-	return is_ASTNode_malloc_call(node);
+	return has_ASTNode_malloc_call(node);
 }
 
 static gboolean mutator_milu_replace_malloc_with_null_mutate(ASTNode * node, gint type)
 {
 	ASTNode * replace;
+	ASTNode * child=node->children;
+	gint index=1;
+	while(child){
+		if(is_ASTNode_malloc_call(child)) break;
+		child=child->next_sibling;
+		index++;
+	}
+	if(!child){
+		return FALSE;
+	}
 	switch(type)
 	{
 		case 1:
 			replace=ASTNode_new_null_pointer_node();
-			replace_subtree_with(node, replace);
-			replace->ext[0]=node;
+			replace_subtree_with(child, replace);
+			tmpIndex=index;
+			tmpNode=child;
 			return TRUE;
 
 		default:
@@ -71,10 +84,9 @@ static gboolean mutator_milu_replace_malloc_with_null_mutate(ASTNode * node, gin
 
 static gboolean mutator_milu_replace_malloc_with_null_clean(ASTNode * node, gint type)
 {
-	ASTNode* ori=(ASTNode*)(node->ext[0]);
-	replace_subtree_with(node, ori);
-	node->ext[0]=0;
-	// TODO free the mutation tree
-	printf("%s\n", node->text);
+	node=ASTNode_get_nth_child(node, tmpIndex);
+	replace_subtree_with(node, tmpNode);
+	tmpNode=NULL;
+	tmpIndex=0;
 	return TRUE;
 }

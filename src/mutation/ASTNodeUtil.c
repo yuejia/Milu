@@ -474,6 +474,30 @@ gboolean is_ASTNode_malloc_call(const ASTNode * node)
 	return FALSE;
 }
 
+gboolean has_ASTNode_calloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	child=node->children;
+	while(child){
+		if(is_ASTNode_calloc_call(child)) return TRUE;
+		child=child->next_sibling;
+	}
+	return FALSE;
+}
+
+gboolean has_ASTNode_malloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	child=node->children;
+	while(child){
+		if(is_ASTNode_malloc_call(child)){
+			return TRUE;
+		}
+		child=child->next_sibling;
+	}
+	return FALSE;
+}
+
 ASTNode * ASTNode_new_null_pointer_node()
 {
 	ASTNode * unexposed_node = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
@@ -498,7 +522,6 @@ gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace)
 	replace->prev_sibling=ori->prev_sibling;
 	replace->next_sibling=ori->next_sibling;
 	ori->parent=NULL;
-	ori->children=NULL;
 	ori->prev_sibling=NULL;
 	ori->next_sibling=NULL;
 	return TRUE;

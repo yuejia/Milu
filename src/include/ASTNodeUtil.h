@@ -569,6 +569,24 @@ gboolean is_ASTNode_calloc_call(const ASTNode * node);
 gboolean is_ASTNode_malloc_call(const ASTNode * node);
 
 /**
+ * \brief Check if the given node has calloc call in it's children nodes
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node has calloc call in it's children nodes.
+ **/
+gboolean has_ASTNode_calloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node has malloc call in it's children nodes
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node has malloc call in it's children nodes.
+ **/
+gboolean has_ASTNode_malloc_call(const ASTNode * node);
+
+/**
  * \brief Create a subtree represents NULL
  *
  * \return Root node of a subtree representing NULL.
