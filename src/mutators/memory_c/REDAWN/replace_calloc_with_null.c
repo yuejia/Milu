@@ -27,20 +27,66 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "MutationOperator.h"
+#include "Mutator.h"
+#include "ASTNodeUtil.h"
 
+static gboolean mutator_milu_replace_calloc_with_null_node_checking(ASTNode *);
+static gboolean mutator_milu_replace_calloc_with_null_clean(ASTNode * node, gint type);
+static gboolean mutator_milu_replace_calloc_with_null_mutate(ASTNode * node, gint type);
 
-Operator * get_REDAWN_operator()
+static ASTNode * tmpNode;
+static gint tmpIndex;
+
+Mutator * mutator_milu_replace_calloc_with_null()
 {
-	const gchar * name = "REDAWN";
-	const gchar * info = "Replace dynamic allocation with NULL pointer";
-
-	Operator * op = mutation_operator_new(name, info);
-
-	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_calloc_with_null());
-	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_malloc_with_null());
-
-	return op;
+	Mutator * mut = mutator_new("(Memory)Replace malloc() with NULL", "");
+	mut->node_checking = & mutator_milu_replace_calloc_with_null_node_checking;
+	mut->mutate = & mutator_milu_replace_calloc_with_null_mutate;
+	mut->clean = & mutator_milu_replace_calloc_with_null_clean;
+	mut->size = 1;
+	return mut;
 }
 
 
+static gboolean mutator_milu_replace_calloc_with_null_node_checking(ASTNode * node)
+{
+	return has_ASTNode_calloc_call(node);
+}
+
+static gboolean mutator_milu_replace_calloc_with_null_mutate(ASTNode * node, gint type)
+{
+	ASTNode * replace;
+	ASTNode * child=node->children;
+	gint index=1;
+	while(child){
+		if(is_ASTNode_calloc_call(child)) break;
+		child=child->next_sibling;
+		index++;
+	}
+	if(!child){
+		return FALSE;
+	}
+	switch(type)
+	{
+		case 1:
+			replace=ASTNode_new_null_pointer_node();
+			replace_subtree_with(child, replace);
+			tmpIndex=index;
+			tmpNode=child;
+			return TRUE;
+
+		default:
+			break;
+	}
+
+	return FALSE;
+}
+
+static gboolean mutator_milu_replace_calloc_with_null_clean(ASTNode * node, gint type)
+{
+	node=ASTNode_get_nth_child(node, tmpIndex);
+	replace_subtree_with(node, tmpNode);
+	tmpNode=NULL;
+	tmpIndex=0;
+	return TRUE;
+}
