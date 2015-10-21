@@ -152,6 +152,18 @@ GPtrArray * mutation_operators_load(const gchar * mut_op_path)
             {
             	g_ptr_array_add(operators, (gpointer)get_REDAWN_operator());
             }
+            else if(g_strcmp0("REDAWZ", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REDAWZ_operator());
+            }
+            else if(g_strcmp0("RESOTPE", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_RESOTPE_operator());
+            }
+            else if(g_strcmp0("REMSOTP", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REMSOTP_operator());
+            }
             else
             {
             	g_assert_not_reached();

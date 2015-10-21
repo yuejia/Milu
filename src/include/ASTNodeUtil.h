@@ -603,6 +603,24 @@ ASTNode * ASTNode_new_null_pointer_node();
  **/
 gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace);
 
+/**
+ * \brief Check if the given node is a sizeof node with a pointer argument
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is a sizeof node with a pointer argument.
+ **/
+gboolean is_ASTNode_sizeof_pointer(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is a sizeof node with a non-pointer argument
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is a sizeof node with a non-pointer argument.
+ **/
+gboolean is_ASTNode_sizeof_nonpointer(const ASTNode * node);
+
 #endif /* ASTNODEUTIL_H_ */
 
 /**@}*/

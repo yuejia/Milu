@@ -39,7 +39,7 @@ static gint tmpIndex;
 
 Mutator * mutator_milu_replace_calloc_with_null()
 {
-	Mutator * mut = mutator_new("(Memory)Replace malloc() with NULL", "");
+	Mutator * mut = mutator_new("(Memory)Replace calloc() with NULL", "");
 	mut->node_checking = & mutator_milu_replace_calloc_with_null_node_checking;
 	mut->mutate = & mutator_milu_replace_calloc_with_null_mutate;
 	mut->clean = & mutator_milu_replace_calloc_with_null_clean;

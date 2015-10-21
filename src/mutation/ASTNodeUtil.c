@@ -455,7 +455,7 @@ gboolean is_ASTNode_calloc_call(const ASTNode * node)
 	ASTNode * child;
 	if(is_ASTNode_has_kind(node, NodeKind_UnexposedExpr) && is_ASTNode_has_text(node, "calloc")){
 		child=node->children;
-		if(is_ASTNode_has_kind(node, NodeKind_CallExpr) && is_ASTNode_has_text(node, "calloc")){
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "calloc")){
 			return TRUE;
 		}
 	}
@@ -525,4 +525,46 @@ gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace)
 	ori->prev_sibling=NULL;
 	ori->next_sibling=NULL;
 	return TRUE;
+}
+
+gboolean is_ASTNode_miluSource_sizeof(const ASTNode * node)
+{
+	if(is_ASTNode_has_kind(node, NodeKind_MiluSource) && node->text!=NULL && g_str_has_prefix(node->text, "sizeof")){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_sizeof_pointer(const ASTNode * node)
+{
+	if(!is_ASTNode_miluSource_sizeof(node)){
+		return FALSE;
+	}
+	gint length;
+	for(length=0; node->text[length]!=0; length++);
+	for(length=length-1; length>0 && node->text[length]!=')'; length--);
+	while(--length>0){
+		if(node->text[length]!=' '){
+			if(node->text[length]=='*') return TRUE;
+			else return FALSE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_sizeof_nonpointer(const ASTNode * node)
+{
+	if(!is_ASTNode_miluSource_sizeof(node)){
+		return FALSE;
+	}
+	gint length;
+	for(length=0; node->text[length]!=0; length++);
+	for(length=length-1; length>0 && node->text[length]!=')'; length--);
+	while(--length>0){
+		if(node->text[length]!=' '){
+			if(node->text[length]=='*') return FALSE;
+			else return TRUE;
+		}
+	}
+	return FALSE;
 }
