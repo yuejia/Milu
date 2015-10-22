@@ -635,11 +635,31 @@ gboolean is_ASTNode_free_statement(const ASTNode * node);
  *
  * \left the first argument of original calloc
  *
- * \left the second argument of original calloc
+ * \right the second argument of original calloc
  *
  * \return new malloc subtree.
  **/
 ASTNode * ASTNode_new_malloc_substitution_for_calloc(ASTNode* left, ASTNode* right);
+
+/**
+ * \brief set the node to a null statement node, will lost the children
+ *
+ * \node The given node to set.
+ *
+ * \return TRUE.
+ **/
+gboolean ASTNode_set_null_statement(ASTNode* node);
+
+/**
+ * \brief restore the free statement with given children
+ *
+ * \node the node to be set to a free statement
+ *
+ * \children free statement's children, well linked with siblings
+ *
+ * \return TRUE.
+ **/
+gboolean ASTNode_restore_free_statement(ASTNode* node, ASTNode* children);
 
 #endif /* ASTNODEUTIL_H_ */
 

@@ -595,3 +595,21 @@ ASTNode * ASTNode_new_malloc_substitution_for_calloc(ASTNode* left, ASTNode* rig
 	ASTNode_append_child(call_node, multiply_node);
 	return call_node;
 }
+
+gboolean ASTNode_set_null_statement(ASTNode* node)
+{
+	node->kind=NodeKind_NullStmt;
+	set_ASTNode_text(node, "");
+	node->children=NULL;
+	return TRUE;
+}
+
+gboolean ASTNode_restore_free_statement(ASTNode* node, ASTNode* children)
+{
+	node->kind=NodeKind_CallExpr;
+	set_ASTNode_text(node, "free");
+	node->children=children;
+	children->parent=node;
+	children->next_sibling->parent=node;
+	return TRUE;
+}
