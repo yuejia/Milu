@@ -621,6 +621,26 @@ gboolean is_ASTNode_sizeof_pointer(const ASTNode * node);
  **/
 gboolean is_ASTNode_sizeof_nonpointer(const ASTNode * node);
 
+/**
+ * \brief Check if the given node is a free() statement
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is a free() statement.
+ **/
+gboolean is_ASTNode_free_statement(const ASTNode * node);
+
+/**
+ * \brief Create a substitution malloc tree for calloc
+ *
+ * \left the first argument of original calloc
+ *
+ * \left the second argument of original calloc
+ *
+ * \return new malloc subtree.
+ **/
+ASTNode * ASTNode_new_malloc_substitution_for_calloc(ASTNode* left, ASTNode* right);
+
 #endif /* ASTNODEUTIL_H_ */
 
 /**@}*/
