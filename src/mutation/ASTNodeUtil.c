@@ -613,3 +613,26 @@ gboolean ASTNode_restore_free_statement(ASTNode* node, ASTNode* children)
 	children->next_sibling->parent=node;
 	return TRUE;
 }
+
+ASTNode * ASTNode_new_alloca_substitution_for_calloc(ASTNode* left, ASTNode* right)
+{
+	left->parent=NULL;
+	left->prev_sibling=NULL;
+	left->next_sibling=NULL;
+	right->parent=NULL;
+	right->prev_sibling=NULL;
+	right->next_sibling=NULL;
+	ASTNode * unexposed_node = ASTNode_new(NodeKind_UnexposedExpr, "alloca", NULL);
+	ASTNode * call_node = ASTNode_new_with_parent(unexposed_node, NodeKind_CallExpr, "alloca", NULL);
+	ASTNode * decl_ref_node = ASTNode_new_with_parent(call_node, NodeKind_DeclRefExpr, "alloca", NULL);
+	
+	ASTNode * unexposed_node_left = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * unexposed_node_right = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * paren_node_left = ASTNode_new_with_parent(unexposed_node_left, NodeKind_ParenExpr, "", NULL);
+	ASTNode * paren_node_right = ASTNode_new_with_parent(unexposed_node_right, NodeKind_ParenExpr, "", NULL);
+	ASTNode_append_child(paren_node_left, left);
+	ASTNode_append_child(paren_node_right, right);
+	ASTNode * multiply_node=ASTNode_new_bop_node("*", unexposed_node_left, unexposed_node_right);
+	ASTNode_append_child(call_node, multiply_node);
+	return unexposed_node;
+}

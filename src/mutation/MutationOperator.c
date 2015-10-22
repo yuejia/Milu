@@ -172,6 +172,14 @@ GPtrArray * mutation_operators_load(const gchar * mut_op_path)
             {
             	g_ptr_array_add(operators, (gpointer)get_RMFS_operator());
             }
+            else if(g_strcmp0("REM2A", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REM2A_operator());
+            }
+            else if(g_strcmp0("REC2A", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REC2A_operator());
+            }
             else
             {
             	g_assert_not_reached();
