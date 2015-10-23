@@ -54,15 +54,14 @@ static gboolean mutator_milu_remove_free_statement_node_checking(ASTNode * node)
 
 static gboolean mutator_milu_remove_free_statement_mutate(ASTNode * node, gint type)
 {
-	ASTNode * child;
+	ASTNode * child, *replace;
 	switch(type)
 	{
 		case 1:
-			child=node->children;
-			child->parent=NULL;
-			child->next_sibling->parent=NULL;
+			child=node->children->next_sibling;
+			replace=ASTNode_new_integer_literal_node("0");
 			tmpNode=child;
-			ASTNode_set_null_statement(node);
+			replace_subtree_with(child, replace);
 			return TRUE;
 
 		default:
@@ -74,6 +73,6 @@ static gboolean mutator_milu_remove_free_statement_mutate(ASTNode * node, gint t
 
 static gboolean mutator_milu_remove_free_statement_clean(ASTNode * node, gint type)
 {
-	ASTNode_restore_free_statement(node, tmpNode);
+	replace_subtree_with(node->children->next_sibling, tmpNode);
 	return TRUE;
 }
