@@ -39,6 +39,8 @@ Operator * get_REDAWN_operator()
 
 	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_calloc_with_null());
 	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_malloc_with_null());
+	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_cast_calloc_with_null());
+	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_cast_malloc_with_null());
 
 	return op;
 }

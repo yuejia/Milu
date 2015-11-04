@@ -48,7 +48,7 @@ Mutator * mutator_milu_replace_malloc_with_alloca()
 
 static gboolean mutator_milu_replace_malloc_with_alloca_node_checking(ASTNode * node)
 {
-	return is_ASTNode_malloc_call(node);
+	return is_ASTNode_malloc_call(node) || is_ASTNode_cast_malloc_call(node);
 }
 
 static gboolean mutator_milu_replace_malloc_with_alloca_mutate(ASTNode * node, gint type)
@@ -56,9 +56,15 @@ static gboolean mutator_milu_replace_malloc_with_alloca_mutate(ASTNode * node, g
 	switch(type)
 	{
 		case 1:
-			ASTNode_set_text(node, "alloca");
-			ASTNode_set_text(node->children, "alloca");
-			ASTNode_set_text(node->children->children, "alloca");
+			if(is_ASTNode_malloc_call(node)){
+				ASTNode_set_text(node, "alloca");
+				ASTNode_set_text(node->children, "alloca");
+				ASTNode_set_text(node->children->children, "alloca");
+			}
+			else{
+				ASTNode_set_text(node->children->next_sibling, "alloca");
+				ASTNode_set_text(node->children->next_sibling->children, "alloca");
+			}
 			return TRUE;
 
 		default:
@@ -70,8 +76,14 @@ static gboolean mutator_milu_replace_malloc_with_alloca_mutate(ASTNode * node, g
 
 static gboolean mutator_milu_replace_malloc_with_alloca_clean(ASTNode * node, gint type)
 {
-	ASTNode_set_text(node, "malloc");
-	ASTNode_set_text(node->children, "malloc");
-	ASTNode_set_text(node->children->children, "malloc");
+	if(is_ASTNode_malloc_call(node)){
+		ASTNode_set_text(node, "malloc");
+		ASTNode_set_text(node->children, "malloc");
+		ASTNode_set_text(node->children->children, "malloc");
+	}
+	else{
+		ASTNode_set_text(node->children->next_sibling, "malloc");
+		ASTNode_set_text(node->children->next_sibling->children, "malloc");
+	}
 	return TRUE;
 }

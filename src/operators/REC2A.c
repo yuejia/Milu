@@ -38,6 +38,7 @@ Operator * get_REC2A_operator()
 	Operator * op = mutation_operator_new(name, info);
 
 	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_calloc_with_alloca());
+	g_ptr_array_add(op->mutators, (gpointer)mutator_milu_replace_cast_calloc_with_alloca());
 
 	return op;
 }

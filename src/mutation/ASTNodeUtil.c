@@ -474,6 +474,32 @@ gboolean is_ASTNode_malloc_call(const ASTNode * node)
 	return FALSE;
 }
 
+gboolean is_ASTNode_cast_calloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_CStyleCastExpr)){
+		if(!node->children || !node->children->next_sibling) return FALSE;
+		child=node->children->next_sibling;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "calloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_cast_malloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_CStyleCastExpr)){
+		if(!node->children || !node->children->next_sibling) return FALSE;
+		child=node->children->next_sibling;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "malloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 gboolean has_ASTNode_calloc_call(const ASTNode * node)
 {
 	ASTNode * child;

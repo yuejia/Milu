@@ -87,28 +87,25 @@ static gboolean mutator_milu_integer_constant_replacement_mutate(ASTNode * node,
 //			set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) * -1));
 //			return TRUE;
 		case 6:
-                        if(atoi(node->text) != 15)
-			    set_ASTNode_text (node, "15");
-                        else
-			    set_ASTNode_text (node, "16");
-			return TRUE;
-		case 7:
-                        if(atoi(node->text) != 255)
-			    set_ASTNode_text (node, "255");
-                        else
-			    set_ASTNode_text (node, "256");
-			return TRUE;
-		case 8:
                         if(atoi(node->text) != 1023)
 			    set_ASTNode_text (node, "1023");
                         else
-			    set_ASTNode_text (node, "1024");
+			    set_ASTNode_text (node, "511");
 			return TRUE;
-		case 9:
+		case 7:
                         if(atoi(node->text) != 32767)
 			    set_ASTNode_text (node, "32767");
                         else
-			    set_ASTNode_text (node, "32768");
+			    set_ASTNode_text (node, "16383");
+			return TRUE;
+		case 8:
+                        set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) * 2));
+			return TRUE;
+		case 9:
+                        if(atoi(node->text) >= 4 || atoi(node->text) <= -4)
+			    set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) / 2));
+                        else
+			    set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) * 3));
 			return TRUE;
 		default:
 			break;

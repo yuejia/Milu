@@ -560,13 +560,31 @@ gboolean is_ASTNode_null_assignment(const ASTNode * node);
 gboolean is_ASTNode_calloc_call(const ASTNode * node);
 
 /**
- * \brief Check if the given node is the root of a calloc call
+ * \brief Check if the given node is the root of a malloc call
  *
  * \node The given node to check.
  *
- * \return TRUE if the given node is the root of a calloc call.
+ * \return TRUE if the given node is the root of a malloc call.
  **/
 gboolean is_ASTNode_malloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a calloc call with a cast in front
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a calloc call with a cast in front.
+ **/
+gboolean is_ASTNode_cast_calloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a malloc call with a cast in front
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a malloc call with a cast in front.
+ **/
+gboolean is_ASTNode_cast_malloc_call(const ASTNode * node);
 
 /**
  * \brief Check if the given node has calloc call in it's children nodes

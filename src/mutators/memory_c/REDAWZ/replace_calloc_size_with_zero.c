@@ -49,13 +49,19 @@ Mutator * mutator_milu_replace_calloc_size_with_zero()
 
 static gboolean mutator_milu_replace_calloc_size_with_zero_node_checking(ASTNode * node)
 {
-	return is_ASTNode_calloc_call(node);
+	return is_ASTNode_calloc_call(node) || is_ASTNode_cast_calloc_call(node);
 }
 
 static gboolean mutator_milu_replace_calloc_size_with_zero_mutate(ASTNode * node, gint type)
 {
 	ASTNode * replace;
-	ASTNode * child=node->children->children->next_sibling;
+	ASTNode * child;
+	if(is_ASTNode_cast_calloc_call(node)){
+		child=node->children->next_sibling->children->next_sibling;
+	}
+	else{
+		child=node->children->children->next_sibling;
+	}
 	switch(type)
 	{
 		case 1:
@@ -74,7 +80,12 @@ static gboolean mutator_milu_replace_calloc_size_with_zero_mutate(ASTNode * node
 
 static gboolean mutator_milu_replace_calloc_size_with_zero_clean(ASTNode * node, gint type)
 {
-	node=node->children->children->next_sibling;
+	if(is_ASTNode_cast_calloc_call(node)){
+		node=node->children->next_sibling->children->next_sibling;
+	}
+	else{
+		node=node->children->children->next_sibling;
+	}
 	replace_subtree_with(node, tmpNode);
 	tmpNode=NULL;
 	return TRUE;
