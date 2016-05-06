@@ -419,3 +419,246 @@ ASTNode * ASTNode_new_empty_function_node(gchar * func_name, ASTNode * params )
 	return func_node;
 
 }
+
+gboolean is_ASTNode_null_assignment(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_assign_op(node)){
+		child = ASTNode_get_nth_child(node, 2);
+		if(child && is_ASTNode_has_kind(child, NodeKind_UnexposedExpr)){
+			child=child->children;
+			if(child){
+				// it could have ParenExpr or not
+				if(is_ASTNode_has_kind(child, NodeKind_ParenExpr)){
+					child=child->children;
+					if(!child){
+						return FALSE;
+					}
+				}
+				if(is_ASTNode_has_kind(child, NodeKind_CStyleCastExpr)){
+					child=child->children;
+					if(child && is_ASTNode_has_kind(child, NodeKind_MiluSource) && is_ASTNode_has_text(child, " void *")){
+						child=child->next_sibling;
+						if(child && is_ASTNode_has_kind(child, NodeKind_IntegerLiteral) && is_ASTNode_has_text(child, "0")){
+							return TRUE;
+						}
+					}
+				}
+			}
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_calloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_UnexposedExpr) && is_ASTNode_has_text(node, "calloc")){
+		child=node->children;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "calloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_malloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_UnexposedExpr) && is_ASTNode_has_text(node, "malloc")){
+		child=node->children;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "malloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_cast_calloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_CStyleCastExpr)){
+		if(!node->children || !node->children->next_sibling) return FALSE;
+		child=node->children->next_sibling;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "calloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_cast_malloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	if(is_ASTNode_has_kind(node, NodeKind_CStyleCastExpr)){
+		if(!node->children || !node->children->next_sibling) return FALSE;
+		child=node->children->next_sibling;
+		if(is_ASTNode_has_kind(child, NodeKind_CallExpr) && is_ASTNode_has_text(child, "malloc")){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean has_ASTNode_calloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	child=node->children;
+	while(child){
+		if(is_ASTNode_calloc_call(child)) return TRUE;
+		child=child->next_sibling;
+	}
+	return FALSE;
+}
+
+gboolean has_ASTNode_malloc_call(const ASTNode * node)
+{
+	ASTNode * child;
+	child=node->children;
+	while(child){
+		if(is_ASTNode_malloc_call(child)){
+			return TRUE;
+		}
+		child=child->next_sibling;
+	}
+	return FALSE;
+}
+
+ASTNode * ASTNode_new_null_pointer_node()
+{
+	ASTNode * unexposed_node = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * cast_node = ASTNode_new_with_parent(unexposed_node, NodeKind_CStyleCastExpr, "", NULL);
+	ASTNode * void_node = ASTNode_new_with_parent(cast_node, NodeKind_MiluSource, " void *", NULL);
+	ASTNode * zero_node = ASTNode_new_with_parent(cast_node, NodeKind_IntegerLiteral, "0", NULL);
+	return unexposed_node;
+}
+
+gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace)
+{
+	if(ori->prev_sibling){
+		ori->prev_sibling->next_sibling=replace;
+	}
+	else if(ori->parent){
+		ori->parent->children=replace;
+	}
+	if(ori->next_sibling){
+		ori->next_sibling->prev_sibling=replace;
+	}
+	replace->parent=ori->parent;
+	replace->prev_sibling=ori->prev_sibling;
+	replace->next_sibling=ori->next_sibling;
+	ori->parent=NULL;
+	ori->prev_sibling=NULL;
+	ori->next_sibling=NULL;
+	return TRUE;
+}
+
+gboolean is_ASTNode_miluSource_sizeof(const ASTNode * node)
+{
+	if(is_ASTNode_has_kind(node, NodeKind_MiluSource) && node->text!=NULL && g_str_has_prefix(node->text, "sizeof")){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_sizeof_pointer(const ASTNode * node)
+{
+	if(!is_ASTNode_miluSource_sizeof(node)){
+		return FALSE;
+	}
+	gint length;
+	for(length=0; node->text[length]!=0; length++);
+	for(length=length-1; length>0 && node->text[length]!=')'; length--);
+	while(--length>0){
+		if(node->text[length]!=' '){
+			if(node->text[length]=='*') return TRUE;
+			else return FALSE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_sizeof_nonpointer(const ASTNode * node)
+{
+	if(!is_ASTNode_miluSource_sizeof(node)){
+		return FALSE;
+	}
+	gint length;
+	for(length=0; node->text[length]!=0; length++);
+	for(length=length-1; length>0 && node->text[length]!=')'; length--);
+	while(--length>0){
+		if(node->text[length]!=' '){
+			if(node->text[length]=='*') return FALSE;
+			else return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+gboolean is_ASTNode_free_statement(const ASTNode * node)
+{
+	return is_ASTNode_has_kind(node, NodeKind_CallExpr) && is_ASTNode_has_text(node, "free");
+}
+
+ASTNode * ASTNode_new_malloc_substitution_for_calloc(ASTNode* left, ASTNode* right)
+{
+	left->parent=NULL;
+	left->prev_sibling=NULL;
+	left->next_sibling=NULL;
+	right->parent=NULL;
+	right->prev_sibling=NULL;
+	right->next_sibling=NULL;
+	ASTNode * call_node = ASTNode_new(NodeKind_CallExpr, "malloc", NULL);
+	ASTNode * decl_ref_node = ASTNode_new_with_parent(call_node, NodeKind_DeclRefExpr, "malloc", NULL);
+	
+	ASTNode * unexposed_node_left = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * unexposed_node_right = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * paren_node_left = ASTNode_new_with_parent(unexposed_node_left, NodeKind_ParenExpr, "", NULL);
+	ASTNode * paren_node_right = ASTNode_new_with_parent(unexposed_node_right, NodeKind_ParenExpr, "", NULL);
+	ASTNode_append_child(paren_node_left, left);
+	ASTNode_append_child(paren_node_right, right);
+	ASTNode * multiply_node=ASTNode_new_bop_node("*", unexposed_node_left, unexposed_node_right);
+	ASTNode_append_child(call_node, multiply_node);
+	return call_node;
+}
+
+gboolean ASTNode_set_null_statement(ASTNode* node)
+{
+	node->kind=NodeKind_NullStmt;
+	set_ASTNode_text(node, "");
+	node->children=NULL;
+	return TRUE;
+}
+
+gboolean ASTNode_restore_free_statement(ASTNode* node, ASTNode* children)
+{
+	node->kind=NodeKind_CallExpr;
+	set_ASTNode_text(node, "free");
+	node->children=children;
+	children->parent=node;
+	children->next_sibling->parent=node;
+	return TRUE;
+}
+
+ASTNode * ASTNode_new_alloca_substitution_for_calloc(ASTNode* left, ASTNode* right)
+{
+	left->parent=NULL;
+	left->prev_sibling=NULL;
+	left->next_sibling=NULL;
+	right->parent=NULL;
+	right->prev_sibling=NULL;
+	right->next_sibling=NULL;
+	ASTNode * unexposed_node = ASTNode_new(NodeKind_UnexposedExpr, "alloca", NULL);
+	ASTNode * call_node = ASTNode_new_with_parent(unexposed_node, NodeKind_CallExpr, "alloca", NULL);
+	ASTNode * decl_ref_node = ASTNode_new_with_parent(call_node, NodeKind_DeclRefExpr, "alloca", NULL);
+	
+	ASTNode * unexposed_node_left = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * unexposed_node_right = ASTNode_new(NodeKind_UnexposedExpr, "", NULL);
+	ASTNode * paren_node_left = ASTNode_new_with_parent(unexposed_node_left, NodeKind_ParenExpr, "", NULL);
+	ASTNode * paren_node_right = ASTNode_new_with_parent(unexposed_node_right, NodeKind_ParenExpr, "", NULL);
+	ASTNode_append_child(paren_node_left, left);
+	ASTNode_append_child(paren_node_right, right);
+	ASTNode * multiply_node=ASTNode_new_bop_node("*", unexposed_node_left, unexposed_node_right);
+	ASTNode_append_child(call_node, multiply_node);
+	return unexposed_node;
+}

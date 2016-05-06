@@ -541,6 +541,155 @@ ASTNode * ASTNode_new_parm_decl_node(gchar * name, NodeTypeKind * type);
  **/
 ASTNode * ASTNode_new_integer_literal_node( gchar * value);
 
+/**
+ * \brief Check if the given node is the root of a null assignment
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a null assignment.
+ **/
+gboolean is_ASTNode_null_assignment(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a calloc call
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a calloc call.
+ **/
+gboolean is_ASTNode_calloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a malloc call
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a malloc call.
+ **/
+gboolean is_ASTNode_malloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a calloc call with a cast in front
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a calloc call with a cast in front.
+ **/
+gboolean is_ASTNode_cast_calloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is the root of a malloc call with a cast in front
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is the root of a malloc call with a cast in front.
+ **/
+gboolean is_ASTNode_cast_malloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node has calloc call in it's children nodes
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node has calloc call in it's children nodes.
+ **/
+gboolean has_ASTNode_calloc_call(const ASTNode * node);
+
+/**
+ * \brief Check if the given node has malloc call in it's children nodes
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node has malloc call in it's children nodes.
+ **/
+gboolean has_ASTNode_malloc_call(const ASTNode * node);
+
+/**
+ * \brief Create a subtree represents NULL
+ *
+ * \return Root node of a subtree representing NULL.
+ **/
+ASTNode * ASTNode_new_null_pointer_node();
+
+/**
+ * \brief Check if the given node is the root of a calloc call
+ *
+ * \ori The root of the original subtree.
+ * \replace The root of the replacement tree.
+ *
+ * \return TRUE if the given node is the root of a calloc call.
+ **/
+gboolean replace_subtree_with(ASTNode * ori, ASTNode * replace);
+
+/**
+ * \brief Check if the given node is a sizeof node with a pointer argument
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is a sizeof node with a pointer argument.
+ **/
+gboolean is_ASTNode_sizeof_pointer(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is a sizeof node with a non-pointer argument
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is a sizeof node with a non-pointer argument.
+ **/
+gboolean is_ASTNode_sizeof_nonpointer(const ASTNode * node);
+
+/**
+ * \brief Check if the given node is a free() statement
+ *
+ * \node The given node to check.
+ *
+ * \return TRUE if the given node is a free() statement.
+ **/
+gboolean is_ASTNode_free_statement(const ASTNode * node);
+
+/**
+ * \brief Create a substitution malloc tree for calloc
+ *
+ * \left the first argument of original calloc call
+ *
+ * \right the second argument of original calloc call
+ *
+ * \return new malloc subtree.
+ **/
+ASTNode * ASTNode_new_malloc_substitution_for_calloc(ASTNode* left, ASTNode* right);
+
+/**
+ * \brief set the node to a null statement node, will lost the children
+ *
+ * \node The given node to set.
+ *
+ * \return TRUE.
+ **/
+gboolean ASTNode_set_null_statement(ASTNode* node);
+
+/**
+ * \brief restore the free statement with given children
+ *
+ * \node the node to be set to a free statement
+ *
+ * \children free statement's children, well linked with siblings
+ *
+ * \return TRUE.
+ **/
+gboolean ASTNode_restore_free_statement(ASTNode* node, ASTNode* children);
+
+/**
+ * \brief Create a substitution alloca tree for calloc
+ *
+ * \left the first argument of original calloc call
+ *
+ * \right the second argument of original calloc call
+ *
+ * \return new alloca subtree.
+ **/
+ASTNode * ASTNode_new_alloca_substitution_for_calloc(ASTNode* left, ASTNode* right);
+
 #endif /* ASTNODEUTIL_H_ */
 
 /**@}*/

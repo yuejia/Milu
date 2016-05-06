@@ -144,6 +144,42 @@ GPtrArray * mutation_operators_load(const gchar * mut_op_path)
               {
               	g_ptr_array_add(operators, (gpointer)get_Austin_CRCR_operator());
               }
+            else if(g_strcmp0("RMNA", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_RMNA_operator());
+            }
+            else if(g_strcmp0("REDAWN", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REDAWN_operator());
+            }
+            else if(g_strcmp0("REDAWZ", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REDAWZ_operator());
+            }
+            else if(g_strcmp0("RESOTPE", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_RESOTPE_operator());
+            }
+            else if(g_strcmp0("REMSOTP", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REMSOTP_operator());
+            }
+            else if(g_strcmp0("REC2M", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REC2M_operator());
+            }
+            else if(g_strcmp0("RMFS", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_RMFS_operator());
+            }
+            else if(g_strcmp0("REM2A", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REM2A_operator());
+            }
+            else if(g_strcmp0("REC2A", op_name) == 0)
+            {
+            	g_ptr_array_add(operators, (gpointer)get_REC2A_operator());
+            }
             else
             {
             	g_assert_not_reached();
