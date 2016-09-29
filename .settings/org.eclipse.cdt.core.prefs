@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.cygwin.base.1027044801/PATH/delimiter=;
+environment/project/cdt.managedbuild.toolchain.gnu.cygwin.base.1027044801/PATH/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.cygwin.base.1027044801/PATH/value=${CYGWIN_HOME}\\bin;C\:/Program Files/Java/jre1.8.0_66/bin/server;C\:/Program Files/Java/jre1.8.0_66/bin;C\:/Program Files/Java/jre1.8.0_66/lib/amd64;C\:\\ProgramData\\Oracle\\Java\\javapath;C\:\\Windows\\system32;C\:\\Windows;C\:\\Windows\\System32\\Wbem;C\:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C\:\\Program Files\\eclipse-cpp-neon-M2-win32-x86_64\\eclipse
+environment/project/cdt.managedbuild.toolchain.gnu.cygwin.base.1027044801/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.cygwin.base.1027044801/appendContributed=true

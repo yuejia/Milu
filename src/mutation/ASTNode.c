@@ -54,7 +54,7 @@ void ASTNodeTypeKindNames_init()
 	 ASTNodeTypeKindNames[8] =   "unsigned short";
 	 ASTNodeTypeKindNames[9] =  "unsigned int";
 	 ASTNodeTypeKindNames[10] =  "unsigned long";
-	 ASTNodeTypeKindNames[11] =  "ulonglong";
+	 ASTNodeTypeKindNames[11] =  "unsigned long long";
 	 ASTNodeTypeKindNames[12] =   "uint128";
 	 ASTNodeTypeKindNames[13] =  "char";//"Char_S";
 	 ASTNodeTypeKindNames[14] =  "SChar";
@@ -62,11 +62,11 @@ void ASTNodeTypeKindNames_init()
 	 ASTNodeTypeKindNames[16] =   "short";
 	 ASTNodeTypeKindNames[17] =  "int";
 	 ASTNodeTypeKindNames[18] =  "long";
-	 ASTNodeTypeKindNames[19] =  "longlong";
+	 ASTNodeTypeKindNames[19] =  "long long";
 	 ASTNodeTypeKindNames[20] =   "int128";
 	 ASTNodeTypeKindNames[21] =  "float";
 	 ASTNodeTypeKindNames[22] =  "double";
-	 ASTNodeTypeKindNames[23] =  "longdouble";
+	 ASTNodeTypeKindNames[23] =  "long double";
 	 ASTNodeTypeKindNames[24] =   "NullPtr";
 	 ASTNodeTypeKindNames[25] =  "Overload";
 	 ASTNodeTypeKindNames[26] =  "Dependent";
@@ -338,10 +338,11 @@ void ASTNode_set_text(ASTNode * node, gchar * text)
 	node->text = text ? g_string_chunk_insert (MiluStringPool, text) : NULL ;
 }
 
-static void ASTNode_free_(ASTNode *node, gpointer data)
+static gboolean ASTNode_free_(ASTNode *node, gpointer data)
 {
-   ASTNodeType_free(node->type);
+	ASTNodeType_free(node->type);
 	g_slice_free (ASTNode, node);
+	return TRUE;
 }
 
 void ASTNode_clean_link(ASTNode * node)
@@ -354,7 +355,23 @@ void ASTNode_clean_link(ASTNode * node)
 
 void ASTNode_free(ASTNode * node)
 {
-    parse_tree_node_traverse_pre_order(node, &ASTNode_free_, NULL);
+	// TODO replace broken implementation
+	// this function deletes the given node only,
+	// it does not delete the children
+	// see ASTNode_free_tree() for correct implementation
+    parse_tree_node_traverse_pre_order(node, ASTNode_free_, NULL);
+}
+
+static gboolean ASTNode_free_tree_(ASTNode *node, gpointer data)
+{
+	ASTNodeType_free(node->type);
+	g_slice_free (ASTNode, node);
+	return FALSE;
+}
+
+void ASTNode_free_tree(ASTNode * tree)
+{
+	parse_tree_node_traverse_post_order(tree, ASTNode_free_tree_, NULL);
 }
 
 ASTNodeType * ASTNodeType_new(NodeTypeKind kind, ASTNode * node)
@@ -403,6 +420,21 @@ gboolean parse_tree_node_traverse_pre_order (ASTNode * node, ASTNodeTraverseFunc
 	return FALSE;
 }
 
+gboolean parse_tree_node_traverse_post_order (ASTNode * node, ASTNodeTraverseFunc func, gpointer data)
+{
+	ASTNode* next_sibling = NULL;
+	for (ASTNode * child = node->children; child != NULL; child = next_sibling)
+	{
+		// already get next sibling to avoid invalid pointer access,
+		// in case 'func' deletes the child
+		next_sibling = child->next_sibling;
+
+		if (parse_tree_node_traverse_post_order (child, func, data))
+			return TRUE;
+	}
+
+	return func (node, data);
+}
 
 // TODO,  only at top level, can improve to a deep search
 ASTNode * ASTNode_search_node_by_cx(ASTNode * parent, gpointer cx)

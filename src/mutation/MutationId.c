@@ -172,7 +172,7 @@ GPtrArray * mutant_ids_get_random_nth_order_cover_fom(GArray * num_template, gin
     				sort_mid(mid);
     				g_ptr_array_add(mids, (gpointer) mid);
     			//	mutation_id_print(mid, stdout);
-    			//	printf("\n");
+    			//	printf(CR);
     			}
     			if(mids->len == mutants_num)
     			{
@@ -296,7 +296,7 @@ void mutation_ids_print(GPtrArray * mids, FILE * output)
 	{
 		MutationId * mid = g_ptr_array_index(mids,i);
 		mutation_id_print(mid,output);
-		g_fprintf(output,"\n");
+		g_fprintf(output,CR);
 	}
 }
 

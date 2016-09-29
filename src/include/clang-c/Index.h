@@ -3565,7 +3565,7 @@ enum CXCompletionChunkKind {
    */
   CXCompletionChunk_HorizontalSpace,
   /**
-   * Vertical space ('\n'), after which it is generally a good idea to
+   * Vertical space, after which it is generally a good idea to
    * perform indentation.
    */
   CXCompletionChunk_VerticalSpace

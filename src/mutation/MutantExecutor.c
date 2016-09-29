@@ -57,7 +57,7 @@ static void execution_strategy_mutant_first_full (GPtrArray * mutants, Mutant * 
 	mutants_results_clean(mutants);
 	for (gint i = 0 ; i < mutants->len; i++)
 	{
-//		g_printf("%d out of %d are complete.\n", i, mutants->len);
+//		g_printf("%d out of %d are complete.%s", i, mutants->len,CR);
 		Mutant * curr_mut = g_ptr_array_index(mutants, i);
 		for (gint j = 0 ; j < tests->len; j++)
 		{
@@ -80,7 +80,7 @@ static void execution_strategy_mutant_first (GPtrArray * mutants, Mutant * origi
 	mutants_results_clean(mutants);
 	for (gint i = 0 ; i < mutants->len; i++)
 	{
-		//g_printf("mutant first: %d out of %d are complete.\n", i, mutants->len);
+		//g_printf("mutant first: %d out of %d are complete.%s", i, mutants->len,CR);
 		Mutant * curr_mut = g_ptr_array_index(mutants, i);
 		for (gint j = 0 ; j < tests->len; j++)
 		{
@@ -99,7 +99,7 @@ static void execution_strategy_test_first_full (GPtrArray * mutants, Mutant * or
 	mutants_results_clean(mutants);
 	for (gint i = 0 ; i < tests->len; i++)
 	{
-		//g_printf("%d out of %d are complete.\n", i, tests->len);
+		//g_printf("%d out of %d are complete.%s", i, tests->len,CR);
 		gchar * curr_test = g_ptr_array_index(tests, i);
 		for (gint j = 0 ; j < mutants->len; j++)
 		{
@@ -122,7 +122,7 @@ static void execution_strategy_test_first (GPtrArray * mutants, Mutant * origina
 	mutants_results_clean(mutants);
 	for (gint i = 0 ; i < tests->len; i++)
 	{
-		//g_printf("test first: %d out of %d are complete.\n", i, tests->len);
+		//g_printf("test first: %d out of %d are complete.%s", i, tests->len,CR);
 		gchar * curr_test = g_ptr_array_index(tests, i);
 		for (gint j = 0 ; j < mutants->len; j++)
 		{
@@ -330,7 +330,7 @@ void mutant_executor_run(GPtrArray * mutants, Mutant * original, GPtrArray * tes
     			{
     				g_log ("Milu",G_LOG_LEVEL_ERROR,"Cannot load the mutants' results.") ;
     			}
-         		g_assert(contents[len] != '\n');
+         		g_assert(contents[len] != '%s',CR);
     			Mutant * curr_mut = g_ptr_array_index(mutants, i);
     			mutant_results_load(curr_mut, contents) ;
     			g_free(contents);

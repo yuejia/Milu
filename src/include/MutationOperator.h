@@ -140,6 +140,7 @@ Operator * get_Austin_OLNG_operator();
 Operator * get_Austin_CRCR_operator();
 
 Operator * get_SSDL_operator();
+Operator * get_SSDL0_operator();
 Operator * get_ABS_operator();
 Operator * get_UOI_operator();
 // free

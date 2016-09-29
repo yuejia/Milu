@@ -127,7 +127,7 @@ void milu_print_results(const Project * project, GPtrArray * mutants, FILE * out
 	g_assert(mutants->len > 0 && "Invalid arguments!");
 
 	milu_project_print(project, PrintDefault, stdout);
-	printf("MS: %d, %f\n", mutants->len, mutants_cal_mutation_score(mutants));
+	printf("MS: %d, %f%s", mutants->len, mutants_cal_mutation_score(mutants),CR);
 }
 
 void milu_print_killing_results(const Project * project, GPtrArray * mutants, FILE * output)
@@ -139,15 +139,15 @@ void milu_print_killing_results(const Project * project, GPtrArray * mutants, FI
 		{
 			g_fprintf(output,"%d", g_array_index(mut->results, guint8, i));
 		}
-			g_fprintf(output,"%s", "\n");
+			g_fprintf(output,"%s", CR);
 		/*
 		if(!mut->iskilled)
-			g_fprintf(output,"Mut %d, Compiled: %d, Killed: %d\n",i , mut->compilable, mut->iskilled);
+			g_fprintf(output,"Mut %d, Compiled: %d, Killed: %d%s",i , mut->compilable, mut->iskilled,CR);
 			mutant_print(mut,stdout);
 			*/
 
 	}
-//	printf("MS: %d, %f\n", mutants->len, mutants_cal_mutation_score(mutants));
+//	printf("MS: %d, %f%s", mutants->len, mutants_cal_mutation_score(mutants),CR);
 }
 
 
@@ -235,7 +235,7 @@ GPtrArray * milu_search_hom(const Project * project, gint mutants_num , gint str
 		for(gint i = 0; i < pop->len; i ++)
 		{
 			Mutant * mut = g_ptr_array_index(pop, i);
-			// 	printf(" %d\n", mut->results->len);
+			// 	printf(" %d%s", mut->results->len,CR);
 			mutant_evaluate_subsuming_fitness(mut, mutants);
 			if (mut->fitness <0.3)
 				g_ptr_array_add(res, mut);
@@ -263,47 +263,47 @@ GPtrArray * milu_search_hom(const Project * project, gint mutants_num , gint str
 			MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_INFO,"Analyse First order mutants") : 0;
 			milu_run_mutation_testing(project, pop, 3);
 			milu_print_results(project, pop, stdout);
-			printf("\n");
+			printf(CR);
 			milu_print_killing_results(project, pop, stdout);
 		}
 
 		for(gint i = 0; i < pop->len; i ++)
 		{
 			Mutant * mut = g_ptr_array_index(pop, i);
-			// 	printf(" %d\n", mut->results->len);
+			// 	printf(" %d%s", mut->results->len,CR);
 			mutant_evaluate_strongly_subsuming_fitness(mut, mutants);
-	//		g_printf("-----------\n");
+	//		g_printf("-----------%s",CR);
 			mutant_print(mut,stdout);
-	//		g_printf("\n--%f\n", mut->fitness);
+	//		g_printf("%s--%f%s", CR,mut->fitness,CR);
 			for(gint j = 0 ; j < mut->foms->len; j++)
 			{
 				Mutant * f = g_ptr_array_index(mut->foms, j);
 	//			mutant_print(f,stdout);
-	//			g_printf("\n");
+	//			g_printf(CR);
 			}
 			if (mut->fitness == 0.0 && mutant_is_killed(mut))
 			{
 				g_ptr_array_add(res, mut);
 			}
 		}
-		g_printf("Summery: \n");
+		g_printf("Summery: %s",CR);
 		for(gint i = 0 ; i < pop->len; i++)
 		{
 
 			Mutant * m = g_ptr_array_index(pop,i);
-			g_printf("-----------\n");
+			g_printf("-----------%s",CR);
 						mutant_print(m,stdout);
-						g_printf("\n--%f\n", m->fitness);
+						g_printf("%s--%f%s", m->fitness,CR);
 						for(gint j = 0 ; j < m->foms->len; j++)
 						{
 							Mutant * f = g_ptr_array_index(m->foms, j);
 							mutant_print(f,stdout);
-							g_printf("\n");
+							g_printf(CR);
 						}
 		}
 		if(res->len == 0)
 		{
-			printf("Didn't find any mutants\n");
+			printf("Didn't find any mutants%s",CR);
 			exit(0);
 		}
 		return res;

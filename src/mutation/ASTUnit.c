@@ -69,7 +69,6 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size);
 static void load_c_source_file(const gchar * path);
 static gboolean search_curr_source_file(gchar * text);
 static gchar * resolve_pointer(CXType type);
-static gboolean is_unary_token(const gchar * token);
 static gint get_unary_operator_id(CXToken * tokens ,unsigned tokens_size);
 static void clean_ast(ASTNode * root);
 static void fix_data_types_duplication();
@@ -116,7 +115,7 @@ ASTUnit * ASTUnit_new(const gchar * src_path)
     	MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"AST add non mutation src")  : 0 ;
         add_original_non_mutation(au->ast);
         //	parse_tree_fix_header(src_path, au->ast); //no need , will be removed
-        //ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} \n"); //no need , will be removed
+        //ASTNode * af =	ASTNode_new_milu_src_node("Austin__Assume(int a, ...){} %s",CR); //no need , will be removed
         //	ASTNode_insert_before(au->ast->children, af);//no need , will be removed
     }
 
@@ -182,11 +181,11 @@ static void parse_tree_fix_functions(ASTNode * func)
 
 		//for(gint i  = 0 ; i < all_u_functions->len; i++)
 		//{
-		//		g_printf("%s\n", g_ptr_array_index(all_u_functions, i));
+		//		g_printf("%s%s", g_ptr_array_index(all_u_functions, i),CR);
 		//	}
 		while(child)
 		{
-			//printf("--%s\n",child->text);
+			//printf("--%s%s",child->text,CR);
 			gboolean func_exists = FALSE;
 			for(int t = 0 ; t < all_u_functions->len; t++)
 			{
@@ -291,10 +290,86 @@ static void libclang_parse_file(ASTUnit* au, int argc, char *argv[ ] )
     clang_disposeIndex(Index);
 }
 
+// the caller takes ownership of the string
+// (use gfree() to delete it)
+// the last token can either be excluded (= TRUE), or included (= FALSE) from the text;
+// for example in a parameter declaration the last token is either the
+// separating comma (= ','), or the closing bracket (= ')').
+static gchar* create_string_from_tokens(CXCursor cursor, gboolean excludeLastToken)
+{
+	CXToken * tokens = NULL;
+	unsigned tokens_size = 0;
+	CXSourceRange ran = clang_getCursorExtent(cursor);
+	clang_tokenize(*CurrTU, ran, &tokens, &tokens_size);
+
+	GString * text = g_string_new("");
+
+	const unsigned size = excludeLastToken ? tokens_size - 1 : tokens_size;
+	for (gint i = 0; i < size; i ++)
+	{
+		CXString token_cstr = clang_getTokenSpelling(*CurrTU, tokens[i]);
+		const char *token_text = clang_getCString(token_cstr);
+
+		g_string_append_printf(text, "%s ", token_text);
+		clang_disposeString(token_cstr);
+	}
+	clang_disposeTokens(*CurrTU,  tokens, tokens_size);
+
+	return g_string_free(text, FALSE);
+}
+
+// define macro DEBUG_PRINT_CLANG_AST to print the visited AST nodes in function visit_ast()
+// #define DEBUG_PRINT_CLANG_AST
+
+#ifdef DEBUG_PRINT_CLANG_AST
+
+static int gDebugVisitAstLevel = 0;
+
+static void debug_enter_visit_ast(CXCursor cursor, CXCursor parent, CXClientData client_data)
+{
+	NodeKind curr_type = (NodeKind)cursor.kind;
+	CXString spelling = clang_getCursorSpelling(cursor);
+	const char* spellingText = clang_getCString(spelling);
+
+	CXType type = clang_getCursorType(cursor);
+	CXType pointeeType = clang_getPointeeType(type);
+	CXType resultType = clang_getResultType(type);
+
+	char* kindName = ASTNodeKindNames[curr_type];
+	char* typeName = ASTNodeTypeKindNames[type.kind];
+	char* pointeeTypeName = ASTNodeTypeKindNames[pointeeType.kind];
+	char* resultTypeName = ASTNodeTypeKindNames[resultType.kind];
+
+
+	g_log ("Milu-C-AST", G_LOG_LEVEL_MESSAGE, "%d> kind '%s', spelling '%s', type '%s', pointee '%s', result type '%s'",
+			gDebugVisitAstLevel, kindName, spellingText, typeName, pointeeTypeName, resultTypeName);
+
+	clang_disposeString(spelling);
+
+	// tokens for current AST node
+	gchar* text = create_string_from_tokens(cursor, FALSE);
+	g_log ("Milu-C-AST", G_LOG_LEVEL_MESSAGE, "%d> tokens '%s'", gDebugVisitAstLevel, text);
+	g_free(text);
+
+	gDebugVisitAstLevel ++;
+}
+
+static void debug_exit_visit_ast(CXCursor cursor, CXCursor parent, CXClientData client_data, ASTNode *node)
+{
+	gDebugVisitAstLevel --;
+	g_log ("Milu-C-AST", G_LOG_LEVEL_MESSAGE, "%d< ", gDebugVisitAstLevel);
+}
+#else
+#define debug_enter_visit_ast(cursor, parent, client_data) {}
+#define debug_exit_visit_ast(cursor, parent, client_data, node) {}
+#endif
+
 static gboolean parsing_in_func =FALSE;
 
 enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
+	debug_enter_visit_ast(cursor, parent, client_data);
+
 	NodeKind curr_type = (NodeKind)cursor.kind;
 	CXString cstr = clang_getCursorSpelling(cursor);
 	ASTNode * node = NULL;
@@ -340,14 +415,20 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		clang_getSpellingLocation ( clang_getRangeEnd(ran), NULL, &line1, &column1, &offset1);
 		node->line_start = line;
 		node->line_end = line1;
-//		printf("-%u %u %u\n", line, column, offset);
-//		printf("-%u %u %u\n\n", line1, column1, offset1);
+		//printf("-%u %u %u", line, column, offset);
+		//printf("-%u %u %u", line1, column1, offset1);
+		//g_log ("Milu-C",G_LOG_LEVEL_MESSAGE, "%u %u %u", line, column, offset);
+		//g_log ("Milu-C",G_LOG_LEVEL_MESSAGE, "%u %u %u", line1, column1, offset1);
 	}
 	else
 	{
+		debug_exit_visit_ast(cursor, parent, client_data, node);
 		return  CXChildVisit_Continue;
 		//	node = ASTNode_new(curr_type,(gchar *)clang_getCString(cstr),(gpointer)cursor.data[0]);
 	}
+
+	//g_log ("Milu-C",G_LOG_LEVEL_MESSAGE, "%s", node->text);
+	//g_log ("Milu-C",G_LOG_LEVEL_MESSAGE, "%d", curr_type);
 
 	switch(curr_type)
 	{
@@ -369,7 +450,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 
                     if(curr_token[0] == '"')
                     {
-                        g_string_append_printf(tmp_string, "%s\n", curr_token);
+                        g_string_append_printf(tmp_string, "%s%s", curr_token,CR);
                         clang_disposeString(token_cstr);
                     }
                     else 
@@ -397,13 +478,15 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		CXToken * tokens = NULL;
 		unsigned tokens_size = 0;
 		clang_tokenize	((*CurrTU), ran, &tokens, &tokens_size);
-        gint u_id = get_unary_operator_id(tokens,tokens_size);
-        //Quick fix
-        if(u_id > 0)
+
+		gint u_id = get_unary_operator_id(tokens,tokens_size);
+        // post fix unary operator detected
+        if(u_id > 0) {
             node->kind = NodeKind_UnaryOperator_Append;
+        }
 
 		CXString token_cstr = clang_getTokenSpelling(*CurrTU,tokens[u_id]);
-		char * curr_token = clang_getCString(token_cstr);
+		const char * curr_token = clang_getCString(token_cstr);
 
 		ASTNode_set_text(node , curr_token);
 
@@ -436,7 +519,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		CXToken * tokens = NULL;
 		unsigned tokens_size = 0;
 		clang_tokenize	((*CurrTU), ran, &tokens, &tokens_size);
-	//		printf("%s: %d\n", ASTNodeKindNames[curr_type],i, clang_getTokenKind (tokens[0]), clang_getTokenKind (tokens[1]));
+	//		printf("%s: %d%s", ASTNodeKindNames[curr_type],i, clang_getTokenKind (tokens[0]), clang_getTokenKind (tokens[1]),CR);
 
 		for (gint i = 0 ; i < tokens_size; i++)
         {
@@ -493,7 +576,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		CXToken * tokens = NULL;
 		unsigned tokens_size = 0;
 		clang_tokenize	((*CurrTU), ran, &tokens, &tokens_size);
-		//	printf("%s: %d, %d, %d\n", ASTNodeKindNames[curr_type],i, clang_getTokenKind (to[0]), clang_getTokenKind (to[1]));
+		//	printf("%s: %d, %d, %d%s", ASTNodeKindNames[curr_type],i, clang_getTokenKind (to[0]), clang_getTokenKind (to[1]),CR);
 
 		gchar * big_op = fix_binary_op(tokens, tokens_size);
 		ASTNode_set_text(node , big_op);
@@ -503,7 +586,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
         {
 		    printf("%s ", clang_getCString( clang_getTokenSpelling(*CurrTU,tokens[i])));
         }
-        printf(": taken %s\n", node->text);
+        printf(": taken %s%s", node->text,CR);
 		 */
 
 
@@ -545,7 +628,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		loc = clang_getTokenLocation(*CurrTU,tokens[0]);
 	}
 	clang_getSpellingLocation (loc, NULL, &line, &column, &offset);
-//	printf("+%u %u %u\n", line, column, offset);
+//	printf("+%u %u %u%s", line, column, offset,CR);
 	clang_disposeTokens(*CurrTU, tokens, tokens_num);
 	node->line_start = line;
 }
@@ -564,9 +647,19 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		break;
 	}
 
+	case NodeKind_ParmDecl:
+	{
+		// add source code as MiluSource node as child to ParmDecl node
+		gchar* text = create_string_from_tokens(cursor, TRUE);
+		ASTNode_add_type(node, NodeTypeKind_Unexposed, NULL);
+		ASTNode_new_with_parent(node, NodeKind_MiluSource, text, NULL);
+		g_free(text);
+		break;
+	}
+
 	case NodeKind_ReturnStmt:
 	case NodeKind_VarDecl:
-	case NodeKind_ParmDecl:
+	// case NodeKind_ParmDecl:
 	{
                 CurrNode = &cursor;
 
@@ -661,7 +754,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
                     token_cstr = clang_getTokenSpelling(*CurrTU,tokens[ti++]);
                     token_fix_text = clang_getCString(token_cstr);
 
-//                    printf("---%s \n", token_fix_text);
+//                    printf("---%s %s", token_fix_text,CR);
                     if( g_strcmp0(token_fix_text, "*")  == 0 )
                     {
 		        g_string_append_printf(tmp_string, " %s", token_fix_text);
@@ -763,7 +856,7 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
             ASTNode_add_type(node, (NodeTypeKind) clang_getCursorType(cursor).kind, NULL);
             gchar * p = resolve_pointer(clang_getCursorType(cursor));
             fflush(stdout);
-//            printf ("***--%s\n", p);
+//            printf ("***--%s%s", p,CR);
             ASTNode_new_with_parent(node, NodeKind_MiluSource, p, NULL);
             g_free(p);
 
@@ -775,12 +868,12 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
             ASTNode_add_type(node, (NodeTypeKind) clang_getCursorType(cursor).kind, NULL);
             if (clang_getCursorType(cursor).kind > 113 )
             {
-                //printf("---%s %d\n",fix_decl_type(node->text), clang_getCursorType(cursor).kind);
+                //printf("---%s %d%s",fix_decl_type(node->text), clang_getCursorType(cursor).kind,CR);
 
                 //                ASTNodeType_set_text(node, fix_decl_type(node->text));
                 ASTNode_set_text(node,  fix_decl_type(node->text));
                 node->kind = NodeKind_MiluSource; 
-//            printf ("***--%s\n", "00");
+//            printf ("***--%s%s", "00",CR);
             }
         }
 
@@ -788,13 +881,13 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 
 
 		g_hash_table_insert(localSymTable, node->text, ASTNodeTypeKindNames[node->type->kind]);
-		//printf("-----%s %s\n", node->text, ASTNodeTypeKindNames[node->type->kind]);
+		//printf("-----%s %s%s", node->text, ASTNodeTypeKindNames[node->type->kind],CR);
 
-                    if(fix_decl_static())
-                        ASTNode_set_static(node);
+		if(fix_decl_static())
+			ASTNode_set_static(node);
 
-                clang_visitChildren(cursor, visit_ast, node);
-                break;
+		clang_visitChildren(cursor, visit_ast, node);
+		break;
 	}
 	case NodeKind_TypedefDecl:
 	case NodeKind_UnionDecl:
@@ -1003,80 +1096,38 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		
 		clang_visitChildren(cursor, visit_ast, node);
 		
-	//	printf("-%s: %s\n", node->text, g_hash_table_lookup(localSymTable, node->text));
+	//	printf("-%s: %s%s", node->text, g_hash_table_lookup(localSymTable, node->text),CR);
 		break;
 
 	case NodeKind_UnexposedExpr:
 	{
-		//TODO: this is for fix the bug the clang which not handle size of
-		if( clang_getCursorType(cursor).kind == NodeTypeKind_ULong  )
+		CXType ct = clang_getCursorType(cursor);
+		// this is for fix the bug in clang which not handle sizeof
+		if( ct.kind == NodeTypeKind_ULong || ct.kind == NodeTypeKind_UInt || ct.kind == NodeTypeKind_Int) // cygwin adaption
 		{
-			CXType ct = clang_getCursorType (cursor);
 			CXSourceRange  ran = clang_getCursorExtent (cursor);
 			CXToken * tokens = NULL;
 			unsigned tokens_num = 0;
 			clang_tokenize	((*CurrTU), ran, &tokens, &tokens_num);
-			GString * tmp_string = g_string_new("");
 
-			gboolean find_type = FALSE;
-
-                        if(tokens_num>0)
-                        {
-                            CXString token_cstr = clang_getTokenSpelling(*CurrTU,tokens[0]);
-                            const char * curr_token = clang_getCString(token_cstr);
-                            if(g_strcmp0(curr_token, "sizeof") == 0)
-                            {
-                                int i = 0;
-                                while(i < tokens_num)
-                                {
-                                    CXString token_cstri = clang_getTokenSpelling(*CurrTU,tokens[i]);
-                                    const char * curr_tokeni = clang_getCString(token_cstri);
- //                                   g_log("-- sizeof: %s\n", G_LOG_LEVEL_WARNING, "%s" ,curr_tokeni);
-                                    
-                        
-            
-                                    if(
-                                        g_strcmp0(curr_tokeni, "+") == 0 ||
-                                        //comment out for a GSL exp, may need to double check YJ
-//                                        g_strcmp0(curr_tokeni, "-") == 0 ||
-//                                          g_strcmp0(curr_tokeni, "*") == 0 ||
-                                        g_strcmp0(curr_tokeni, "/") == 0 ||
-                                        g_strcmp0(curr_tokeni, "=") == 0 ||
-                                        g_strcmp0(curr_tokeni, ";") == 0 ||
-                                        g_strcmp0(curr_tokeni, "<=") == 0
-                                    )
-                                    {
-                                        i = tokens_num;
-                                        clang_disposeString(token_cstri);
-                                        i++;
-                                        continue;
-                                    }
-
-                                    g_string_append_printf(tmp_string , "%s ", curr_tokeni);
-
-                                    if(g_strcmp0(curr_tokeni, ")") == 0)
-                                    {
-                                        i = tokens_num;
-                                    }
-                                    clang_disposeString(token_cstri);
-                                    i++;
-                                }
-
-			// switch off the warning of testing
-//			g_log("Parsing warning",G_LOG_LEVEL_WARNING, "Find sizeof:  %s ", tmp_string->str);
-			ASTNode_new_with_parent(node, NodeKind_MiluSource, tmp_string->str, NULL);
-
-			}
-			clang_disposeString(token_cstr);
-
-			clang_disposeTokens(*CurrTU, tokens, tokens_num);
-
-			g_string_free(tmp_string, TRUE);
-			}
-			}
+			if(tokens_num>0)
+            {
+                CXString token_cstr = clang_getTokenSpelling(*CurrTU, tokens[0]);
+                const char * curr_token = clang_getCString(token_cstr);
+                if (g_strcmp0(curr_token, "sizeof") == 0)
+                {
+        			gchar* text = create_string_from_tokens(cursor, TRUE);
+        			ASTNode_new_with_parent(node, NodeKind_MiluSource, text, NULL);
+        			g_free(text);
+                }
+                clang_disposeString(token_cstr);
+            }
+            clang_disposeTokens(*CurrTU, tokens, tokens_num);
+		}
 		clang_visitChildren(cursor, visit_ast, node);
 		break;
 	}
+
 	case NodeKind_CompoundStmt:
 	{
 		clang_visitChildren(cursor, visit_ast, node);
@@ -1125,9 +1176,10 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		break;
 	}
 	*/
-	//TODO : 5 may bee to be fixed.
-	case 407:
-	case 5:
+
+	case NodeKind_AsmLabelAttr:
+	case NodeKind_EnumDecl: //TODO : may bee to be fixed.
+	case NodeKind_ConstAttr:
 			break;
 	default:
 	{
@@ -1139,7 +1191,9 @@ enum CXChildVisitResult visit_ast(CXCursor cursor, CXCursor parent, CXClientData
 		break;
 	}
 	}
+
 	//TODO fix return value
+	debug_exit_visit_ast(cursor, parent, client_data, node);
 	return  CXChildVisit_Continue;
 }
 
@@ -1266,7 +1320,7 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
                     }
                 }
 
-//                printf("currweight: %d\n", curr_token_weight);
+//                printf("currweight: %d%s", curr_token_weight,CR);
 
                 if (curr_token_weight > big_weight)
                 {
@@ -1284,7 +1338,7 @@ static gchar * fix_binary_op(CXToken * tokens ,unsigned tokens_size)
         clang_disposeString(token_cstr);
     }
 
- //   printf("op: %s\n", big_op);
+ //   printf("op: %s%s", big_op,CR);
     return big_op;
 }
 
@@ -1328,47 +1382,88 @@ static gchar * resolve_pointer(CXType type)
     return g_string_free(pointer, FALSE);
 }
 
-static gboolean is_unary_token(const gchar * token)
-{
-	if(g_strcmp0(token, "++")==0)
-	    return TRUE;
-	else if(g_strcmp0(token, "--")==0)
-	    return TRUE;
-	else if(g_strcmp0(token, "!")==0)
-	    return TRUE;
-	else if(g_strcmp0(token, "*")==0)
-	    return TRUE;
-	else if(g_strcmp0(token, "&")==0)
-	    return TRUE;
-    else if(g_strcmp0(token, "-")==0)
-        return TRUE;
-    else if(g_strcmp0(token, "~")==0)
-        return TRUE;
-    else
-	    return FALSE;
 
+static gboolean is_unary_postfix_operator(const gchar *op)
+{
+	if (g_strcmp0(op, "++") == 0)
+	    return TRUE;
+	if (g_strcmp0(op, "--") == 0)
+	    return TRUE;
+	return FALSE;
 }
-static gint get_unary_operator_id(CXToken * tokens ,unsigned tokens_size)
+
+static gboolean is_unary_prefix_operator(const gchar *op)
 {
-	for (gint i = 0; i < tokens_size; i++)
+	if (g_strcmp0(op, "++") == 0)
+	    return TRUE;
+	if (g_strcmp0(op, "--") == 0)
+	    return TRUE;
+	if (g_strcmp0(op, "!") == 0)
+	    return TRUE;
+	if (g_strcmp0(op, "*") == 0)
+	    return TRUE;
+	if(g_strcmp0(op, "&") == 0)
+	    return TRUE;
+    if(g_strcmp0(op, "-") == 0)
+        return TRUE;
+    if(g_strcmp0(op, "~") == 0)
+        return TRUE;
+	return FALSE;
+}
+
+static gint get_unary_operator_id(CXToken * tokens, unsigned tokens_size)
+{
+	gint index;
+	CXString token_cstr;
+	const char * curr_token;
+	gboolean isOperator;
+
+	// test if there is a prefix operator
+	index = 0;
+	token_cstr = clang_getTokenSpelling(*CurrTU,tokens[index]);
+	curr_token = clang_getCString(token_cstr);
+	isOperator = is_unary_prefix_operator(curr_token);
+	clang_disposeString(token_cstr);
+	if (isOperator)
 	{
-		CXString token_cstr = clang_getTokenSpelling(*CurrTU,tokens[i]);
-		const char * curr_token = clang_getCString(token_cstr);
-
-     //    g_printf(curr_token);
-    //    g_printf(" ");
-		if(is_unary_token(curr_token))
-		{
-   //     g_printf("\n");
-            return i;
-		}
-		clang_disposeString(token_cstr);
+		return index;
 	}
-  //      g_printf("\n");
 
-	//TODO: This should be switch on for most of time, but may cos unknown stop
-//    g_assert_not_reached();
-            return 0;
+	// test if there is a post fix operator
+	if (tokens_size > 0)
+	{
+		index = tokens_size - 1;
+
+		token_cstr = clang_getTokenSpelling(*CurrTU, tokens[index]);
+		curr_token = clang_getCString(token_cstr);
+
+		// sometimes there is one token to much at the end, skip it
+		// for example the semicolon in "v = i ++;"
+		// and the closing brace in "v = (i++);"
+		if (!is_unary_postfix_operator(curr_token))
+		{
+			clang_disposeString(token_cstr);
+			index --;
+
+			if (index < 0)
+			{
+				g_log ("Milu", G_LOG_LEVEL_ERROR, "Internal error: Expected prefix unary operator!") ;
+				return 0;
+			}
+			token_cstr = clang_getTokenSpelling(*CurrTU, tokens[index]);
+			curr_token = clang_getCString(token_cstr);
+		}
+
+		isOperator = is_unary_postfix_operator(curr_token);
+		clang_disposeString(token_cstr);
+		if (isOperator)
+		{
+			return index;
+		}
+	}
+
+	g_log ("Milu", G_LOG_LEVEL_ERROR, "Internal error: Expected prefix unary operator!") ;
+    return 0;
 }
 
 static void add_original_non_mutation(ASTNode * ast)
@@ -1383,20 +1478,20 @@ static void add_original_non_mutation(ASTNode * ast)
 	{
 		g_log ("Milu",G_LOG_LEVEL_ERROR,"Cannot load the inputs file. %s", milu_options_get_src_path()) ;
 	}
-	gchar ** inputs  = g_strsplit (contents, "\n", -1);
+	gchar ** inputs  = g_strsplit (contents, CR, -1);
 	gchar ** curr_input = inputs;
 
     GString * buffer = g_string_sized_new((gsize)102400);
     gint flen = 0;
     while(*curr_input)
     {
-//    	g_string_append_printf(buffer,"%s\n",  *curr_input);
+//    	g_string_append_printf(buffer,"%s%s",  *curr_input,CR);
     	flen++;
     	curr_input++;
     }
 
 
-  //  printf("%d-\n",flen);
+  //  printf("%d-%s",flen,CR);
 
     int i = 0 ;
 	while(child)
@@ -1408,19 +1503,19 @@ static void add_original_non_mutation(ASTNode * ast)
 			g_string_printf(buffer,"%s", "");
 			for(int j = curr_line-1; j < child->line_start-1; j++)
 			{
-				g_string_append_printf(buffer,"%s\n",  *(inputs+j));
+				g_string_append_printf(buffer,"%s%s",  *(inputs+j),CR);
 			}
 			ASTNode * node = ASTNode_new_milu_src_node(buffer->str);
 			ASTNode_insert_before(child, node);
 //			printf("--  ");
-//			printf("%d, %d\n", curr_line , child->line_start-1);
+//			printf("%d, %d%s", curr_line , child->line_start-1,CR);
 //			printf("%s",buffer);
-			//printf("i: %d\n ", i);
+			//printf("i: %d%s ", i,CR);
 			curr_line = child->line_end+1;
 		}
 
-	//	printf("-i: %d %s\n ", i, child->text);
-	//	printf("%d, %d\n", child->line_start, child->line_end);
+	//	printf("-i: %d %s%s ", i, child->text,CR);
+	//	printf("%d, %d%s", child->line_start, child->line_end,CR);
 		curr_line = child->line_end+1;
 
 		if(!child->next_sibling )
@@ -1435,11 +1530,11 @@ static void add_original_non_mutation(ASTNode * ast)
 		g_string_printf(buffer,"%s", "");
 		for(int j = child->line_end; j < flen; j++)
 		{
-			g_string_append_printf(buffer,"%s\n",  *(inputs+j));
+			g_string_append_printf(buffer,"%s%s",  *(inputs+j),CR);
 		}
 
 		//		printf("--");
-		//printf("%d, %d\n", child->line_end+1, flen);
+		//printf("%d, %d%s", child->line_end+1, flen,CR);
 		//		printf("%s",buffer);
 		ASTNode * node = ASTNode_new_milu_src_node(buffer->str);
 		ASTNode_append_child(child->parent, node);
@@ -1602,7 +1697,7 @@ static void fix_data_types_duplication()
                    {
                 	          ;
                    }
-    	          // printf("%s\n", curr_node->text);
+    	          // printf("%s%s", curr_node->text,CR);
                }
 	       }
     }
@@ -1681,34 +1776,37 @@ static gboolean fix_decl_static()
 	CXToken * tokens = NULL;
 	unsigned tokens_num = 0;
 	clang_tokenize	((*CurrTU), ran, &tokens, &tokens_num);
-	GString * tmp_string = g_string_new("");
+
+	gboolean result = FALSE;
 	if (tokens_num > 0)
 	{
-		for (gint j = 0 ; j < tokens_num; j++)
+		gboolean hasResult = FALSE;
+		for (gint j = 0 ; j < tokens_num && !hasResult; j++)
 		{
 			CXString curr_token = clang_getTokenSpelling(*CurrTU, tokens[j]) ;
             const gchar * curr_str = clang_getCString(curr_token);
-            //printf("-%d ", tokens_num);
-            //printf("-%s ", curr_str);
 
             if(g_strcmp0("static", curr_str) == 0)
             {
-                return TRUE;
+                result = TRUE;
+                hasResult = TRUE;
             }
-            if(g_strcmp0("{", curr_str) == 0)
+            else if(g_strcmp0("{", curr_str) == 0)
             {
-                return FALSE;
+                result = FALSE;
+                hasResult = TRUE;
             }
-            if(j > 5)
+            else if(j > 5)
             {
-            	return FALSE;
+            	result = FALSE;
+            	hasResult = TRUE;
             }
-           clang_disposeString(curr_token);
+            clang_disposeString(curr_token);
 	    }
 	}
 	clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
-	return FALSE;
+	return result;
 }
 
 static gchar * fix_decl_type(gchar * var)
@@ -1717,8 +1815,7 @@ static gchar * fix_decl_type(gchar * var)
 	CXToken * tokens = NULL;
 	unsigned tokens_num = 0;
 	clang_tokenize	((*CurrTU), ran, &tokens, &tokens_num);
-	GString * tmp_string = g_string_new("");
-        GString * buff = g_string_new("");
+    GString * buff = g_string_new("");
 
 	if (tokens_num > 0)
 	{
@@ -1751,7 +1848,7 @@ static gchar * fix_decl_type(gchar * var)
 
 	clang_disposeTokens(*CurrTU, tokens, tokens_num);
 
-        return g_string_free(buff, FALSE);
+	return g_string_free(buff, FALSE);
 }
 
 static gboolean fix_function_pointer(ASTNode * func)
@@ -1765,7 +1862,7 @@ static gboolean fix_function_pointer(ASTNode * func)
         {
              if(ASTNode_search_children_type(node, NodeTypeKind_Pointer))
              {
-            	 //g_printf("Found func pointer\n");
+            	 //g_printf("Found func pointer%s",CR);
                  return TRUE;
              }
         }

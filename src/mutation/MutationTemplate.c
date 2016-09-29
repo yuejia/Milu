@@ -170,7 +170,7 @@ void mutation_template_clean_mutation(gint loc, gint id)
 				gint curr_mut_id = curr_mut->size - (curr_size - id );
 				curr_mut->clean(curr_node, curr_mut_id);
 				//testing
-		//	g_printf("end: %p, %d\n", curr_node, curr_mut_id);
+		//	g_printf("end: %p, %d%s", curr_node, curr_mut_id,CR);
 
 			// bug fix Yue: October 27, 2012
 			break;
@@ -202,7 +202,7 @@ void mutation_template_apply_mutation(gint loc, gint id)
 			gint curr_mut_id = curr_mut->size - (curr_size - id );
 			curr_mut->mutate(curr_node, curr_mut_id);
 			//testing:
-		//	g_printf("start: %p, %d\n", curr_node, curr_mut_id);
+		//	g_printf("start: %p, %d%s", curr_node, curr_mut_id,CR);
 
 			break; // bug fix Yue: October 27, 2012
 		}
@@ -248,7 +248,7 @@ static gboolean mutation_template_check_mutation(ASTNode * node, gpointer data)
 			{
 				g_ptr_array_add(curr_mut_slot, (gpointer) curr_mut);
 				if (MILU_PRINT_MUT_TYPE)
-				printf("%d %d\n", i, curr_mut->size);
+				printf("%d %d%s", i, curr_mut->size,CR);
 			}
 		}
 	}

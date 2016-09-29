@@ -55,7 +55,7 @@ void mutants_print(GPtrArray * muts, FILE * output)
 	{
 		curr_mut = g_ptr_array_index(muts, i);
 		mutant_print(curr_mut, output);
-		g_fprintf(output,"\n");
+		g_fprintf(output,CR);
 	}
 }
 
@@ -234,7 +234,7 @@ void mutants_results_save(GPtrArray * muts, FILE * output)
 	{
 		curr_mut = g_ptr_array_index(muts, i);
 		mutant_results_save(curr_mut, output);
-		g_fprintf(output,"\n");
+		g_fprintf(output,CR);
 	}
 }
 
@@ -252,7 +252,7 @@ void mutants_results_load(GPtrArray * muts, gchar * muts_results_path)
 	{
 		g_log ("Milu",G_LOG_LEVEL_ERROR,"Cannot load the mutants' results.") ;
 	}
-	gchar ** inputs  = g_strsplit (contents, "\n", -1);
+	gchar ** inputs  = g_strsplit (contents, CR, -1);
 	gchar ** curr_input = inputs;
 
 	gint i = 0;
@@ -296,6 +296,6 @@ void mutants_save_id(GPtrArray * muts, FILE * output)
     {
     	Mutant* curr_mut = g_ptr_array_index(muts, i);
     	mutation_id_print(curr_mut->id, output);
-    	fprintf(output, "%s", "\n");
+    	fprintf(output, "%s", CR);
     }
 }

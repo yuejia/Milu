@@ -49,36 +49,36 @@ GPtrArray * process_unit_testing_driver(const gchar * unit_tests_path)
 	GString * driver_text= g_string_sized_new((gsize)102400);
 	GString * test_text= g_string_sized_new((gsize)102400);
 
-	g_string_append_printf(driver_text,"%s","#include <stdio.h>\n#include <stdlib.h> \n");
-//	g_string_append_printf(driver_text,"%s","#include <stdio.h>\n");
+	g_string_append_printf(driver_text,"#include <stdio.h>%s#include <stdlib.h> %s",CR,CR);
+//	g_string_append_printf(driver_text,"#include <stdio.h>%s",CR);
 
 	GPtrArray * utest = milu_utility_load_text_file_to_gptrarray(unit_tests_path);
 	   for(gint i = 0 ; i < utest-> len ; i ++)
 	   {
 	    	gchar * curr_line = g_ptr_array_index(utest,i);
 	    	g_string_append_printf(driver_text,"%s",curr_line);
-	    	g_string_append_printf(driver_text,"%s","\n");
+	    	g_string_append_printf(driver_text,"%s",CR);
 	   }
 
-	   g_string_append_printf(driver_text,"int main(int argc, char * argv[])\n {\n");
+	   g_string_append_printf(driver_text,"int main(int argc, char * argv[])%s {%s",CR,CR);
 
-	   g_string_append_printf(driver_text,"alarm(1);\n");
+	   g_string_append_printf(driver_text,"alarm(1);%s",CR);
 	   for(gint i = 0 ; i < func_list-> len ; i ++)
 	    {
 	    	ASTNode * curr_func = g_ptr_array_index(func_list, i);
 	    	if(is_ASTNode_func_decl_with_body(curr_func))
 	    	{
-	    	g_string_append_printf(test_text,"%d\n", i);
-	    	g_string_append_printf(driver_text,"if( atoi(argv[1]) == %d)\n", i);
+	    	g_string_append_printf(test_text,"%d%s", i,CR);
+	    	g_string_append_printf(driver_text,"if( atoi(argv[1]) == %d)%s", i,CR);
 
-	    	g_string_append_printf(driver_text,"fprintf(stdout, \"%%d\",%s());\n",curr_func->text);
-//	    	printf("%s\n", curr_func->text);
+	    	g_string_append_printf(driver_text,"fprintf(stdout, \"%%d\",%s());%s",curr_func->text,CR);
+//	    	printf("%s%s", curr_func->text,CR);
 	    	}
 	    }
-	   g_string_append_printf(driver_text,"exit(0);}\n");
+	   g_string_append_printf(driver_text,"exit(0);}%s",CR);
 
-//	   printf("%s\n", driver_text->str);
-//	   printf("%s\n", test_text->str);
+//	   printf("%s%s", driver_text->str,CR);
+//	   printf("%s%s", test_text->str,CR);
 
 	   FILE * dfile = fopen("milu_driver.c","w");
 	   dfile == NULL ? g_log ("Milu",G_LOG_LEVEL_ERROR,"cannot write milu driver %s", "milu_driver.c") : 0;

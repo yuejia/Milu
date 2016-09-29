@@ -1,0 +1,108 @@
+MiLu Model
+==========
+
+Erstellt am 23.3.2016 von Michael Pfeiffer
+
+AST
+---
+
+- Knoten
+- text ... Text (z.B. Variablenname, Literalwert, Typname, ...)
+- kind ... Knotenart (NodeKind)
+- type ... Knotentyp (NodeTypeKind)
+- children ... Zeiger auf den ersten Knoten der Kinder
+- next_sibling/prev_sibling ... doppelt verkettete Liste (innerhalb der Kinder)
+
+{} ... mehrfach
+{}+ ... mehrfach (mind. 1. Mal)
+[] ... optional
+
+Format
+------
+
+1) Der Titel enthält einen Namen für die Datenstruktur
+   In Klammer wird angegeben, ob es sich um einen Konten
+   handelt, oder um einen Typ
+2) Zeile mit 3 Spalten für text, kind, type
+   Nil ... wenn text leer ist
+   Alternativ kann hier auch ein Verweis auf die Beschreibung
+   eines Konten stehen.
+3) Falls Kindknoten vorhanden sind, werden diese eingerückt mit einem
+   vorangestellt Pluszeichen, wie unter (2) angegeben
+
+Funktionsdeklaration (Knoten)
+-----------------------------
+Funktionsname FunctionDecl Rückgabetyp
++ Parameterdeklaration (für jeden Formalparameter)
++ CompoundStmt (für Funktionsrumpf, entfällt bei Funktionsprototyp)  
+
+Parameterdeklaration (Knoten)
+-----------------------------
+Variablenname ParmDecl Unexposed
++ Deklaration MiluSource // die vollständige Deklaration inkl. des Variablennamen
+
+ConstantArray (Type)
+--------------------
+Arrayelementtyp (Knoten) // z.B. TypRef
+{Arraygröße (Knoten)}+   // Dimension(en) z.B. IntegerLiteral, C Typecast
+[Nil InitListExpr]       // optional
+
+Typreferenz (Knoten)
+--------------------
+Typname TypeRef
+
+C Typecast (Knoten)
+-------------------
+Nil CStyleCastExpr
++ Type1 MiluSource  // unklar wozu dieser Konten vorhanden ist; Type1 und Type2 sind identisch?
++ Type2 TypeRef     // Typ auf den gecastet wird
++ Operand IntegerLiteral // Der Operand, der gecastet wird
+
+Variablendeklaration (Knoten)
+-----------------------------
+Bsp.: uint8 u8TabIndex[2] = {(uint8)0, (uint8)0};
+Variablenname VarDecl Typ
+
+InitListExpr (Knoten)
+---------------------
++ Element1 z.B. CStyleCastExpr
++ Element2
++ ...
+
+DeclStmt (Knoten)
+-----------------
++ {Deklarationen}+
+
+
+ArraySubscriptExpr (Knoten)
+---------------------------
+Bsp.: a[i]
+Nil ArraySubscriptExpr
++ Name FirstExpr
++ Subscript Expression
+
+FirstExpr (Knoten)
+------------------
+Bsp.: Der Name in einem ArraySubscriptExpr
+Name FirstExpr
++ Name DeclRefExpr
+
+ParenExpr (Knoten)
+------------------
+Ausdruck innerhalb einer Klammer
+Bsp.: (a)
+Nil ParenExpr
++ Ausdruck Expression
+
+IfStmt (Knoten)
+---------------
+"" IfStmt
++ Bedingung
++ Then-Zweig
+[+ Else-Zweig]
+
+IntLiteral (Knoten)
+-------------------
+Nil IntLiteral
++ "Wert" MiluSourceInteger
+ 

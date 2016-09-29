@@ -157,11 +157,11 @@ int main(int argc, char *argv[ ] ) {
                 {
 		    MILU_GLOBAL_VERBOSE ? g_log ("Milu",G_LOG_LEVEL_MESSAGE,"Apply TCE Optimisation") : 0;
 		    milu_check_equivalent_mutants(mutants, project->original_program);
-                    printf("Generated %d mutants\n", mutants->len);
-                    printf("Number of compilable mutants: %d\n", mutants_get_compiled_number(mutants));
-                    printf("Number of equivalent mutants: %d\n", mutants_get_equivalent_number(mutants));
+                    printf("Generated %d mutants%s", mutants->len, CR);
+                    printf("Number of compilable mutants: %d%s", mutants_get_compiled_number(mutants),CR);
+                    printf("Number of equivalent mutants: %d", mutants_get_equivalent_number(mutants),CR);
 		    milu_check_duplicated_mutants(mutants);
-                    printf("Number of duplicated mutants: %d\n", mutants_get_duplicated_number(mutants));
+                    printf("Number of duplicated mutants: %d", mutants_get_duplicated_number(mutants),CR);
                 }
 	}
 

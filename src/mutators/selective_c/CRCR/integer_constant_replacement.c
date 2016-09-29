@@ -41,7 +41,7 @@ Mutator * mutator_milu_integer_constant_replacement()
 	mut->node_checking = & mutator_milu_integer_constant_replacement_node_checking;
 	mut->mutate = & mutator_milu_integer_constant_replacement_mutate;
 	mut->clean = & mutator_milu_integer_constant_replacement_clean;
-	mut->size = 9;
+	mut->size = 5;
 	return mut;
 }
 
@@ -86,27 +86,6 @@ static gboolean mutator_milu_integer_constant_replacement_mutate(ASTNode * node,
 //		case 6:
 //			set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) * -1));
 //			return TRUE;
-		case 6:
-                        if(atoi(node->text) != 1023)
-			    set_ASTNode_text (node, "1023");
-                        else
-			    set_ASTNode_text (node, "511");
-			return TRUE;
-		case 7:
-                        if(atoi(node->text) != 32767)
-			    set_ASTNode_text (node, "32767");
-                        else
-			    set_ASTNode_text (node, "16383");
-			return TRUE;
-		case 8:
-                        set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) * 2));
-			return TRUE;
-		case 9:
-                        if(atoi(node->text) >= 4 || atoi(node->text) <= -4)
-			    set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) / 2));
-                        else
-			    set_ASTNode_text (node, g_strdup_printf("%d", atoi(node->text) * 3));
-			return TRUE;
 		default:
 			break;
 	}
