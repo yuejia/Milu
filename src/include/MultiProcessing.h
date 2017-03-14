@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <unistd.h> 
 #include <sys/wait.h>
+#include <sys/types.h>
 
 /**
  * \brief Alias for MultiProcess function run mutants.
