@@ -195,7 +195,7 @@ void  mutant_check_dir(gchar * path)
 void mutant_print(Mutant * mut, FILE * output)
 {
 	mutation_id_print(mut->id, output);
-	g_fprintf(output,"Compiled: %d, Killed: %d\n", mut->compilable, mut->iskilled);
+	g_fprintf(output,"Compiled: %d, Killed: %d%s", mut->compilable, mut->iskilled,CR);
 
 	if ( mutant_has_results(mut))
 	{
@@ -240,7 +240,7 @@ void mutant_compile(Mutant * mut, gchar * command, gchar * driver)
 	g_string_printf(cmd,"%s","");
 
         g_string_printf(cmd,"%s %s/%s -lm -o %s/%s",command, mut->src_path, ASTUnit_get_file_name(ASTUnit_get_current()),  mut->bin_path, "mut.exe");
-//printf("--%s\n",cmd->str);
+//printf("--%s%s",cmd->str,CR);
 //fflush(stdout);
 
 //g_log ("Milu",G_LOG_LEVEL_ERROR,cmd->str) ;
@@ -289,7 +289,7 @@ gboolean mutant_run(Mutant * mut, Mutant * std, gchar * test)
 					NULL //GError **error
 			);
 
-	// debug printf("%s\n", mut_output);
+	// debug printf("%s%s", mut_output,CR);
 
 	if(!g_hash_table_lookup (std_outputs,test))
 	{
@@ -394,16 +394,16 @@ gboolean mutant_check_duplication(Mutant * curr_mut, Mutant * next_mut)
                 NULL //GError **error
                 );
 
-        //printf("--diff: %s\n", mut_output);
+        //printf("--diff: %s%s", mut_output,CR);
         if (g_strcmp0(mut_output, "") == 0)
         {
             mutant_set_duplicated(curr_mut);
-            //printf("--diff: %s\n", "EQ");
+            //printf("--diff: %s%s", "EQ",CR);
         }
 /*
         else
         {
-            //printf("--diff: %s\n", "NEQ");
+            //printf("--diff: %s%s", "NEQ",CR);
         }
 */
     }
@@ -432,16 +432,16 @@ gboolean mutant_check_equivalence(Mutant * mut, Mutant * std)
                 NULL //GError **error
                 );
 
-        //printf("--diff: %s\n", mut_output);
+        //printf("--diff: %s%s", mut_output,CR);
         if (g_strcmp0(mut_output, "") == 0)
         {
             mutant_set_equivalence(mut);
-            //printf("--diff: %s\n", "EQ");
+            //printf("--diff: %s%s", "EQ",CR);
         }
 /*
         else
         {
-            //printf("--diff: %s\n", "NEQ");
+            //printf("--diff: %s%s", "NEQ",CR);
         }
 */
     }
@@ -479,7 +479,7 @@ void mutant_results_save(Mutant * mut, FILE * output)
 {
     if (mutant_has_results(mut))
     {
- //     g_fprintf(output,"MILU_MUTANTS_RESULTS_FULL\n");
+ //     g_fprintf(output,"MILU_MUTANTS_RESULTS_FULL%s",CR);
         for(gint i = 0 ; i < mut->results->len; i++)
         {
             g_fprintf(output,"%u", g_array_index(mut->results, guint8, i));
@@ -487,7 +487,7 @@ void mutant_results_save(Mutant * mut, FILE * output)
     }
     else
     {
- //     g_fprintf(output,"MILU_MUTANTS_RESULTS_COMPACT\n");
+ //     g_fprintf(output,"MILU_MUTANTS_RESULTS_COMPACT%s",CR);
         if(mutant_is_killed(mut))
         {
             g_fprintf(output,"%d", 1);
@@ -549,7 +549,7 @@ void mutant_evaluate_strongly_subsuming_fitness(Mutant * mut, GPtrArray * foms)
 {
 	g_assert(mut->id->len > 0);
 
-//	printf("HOM: \n");
+//	printf("HOM: %s",CR);
 //	mutant_print(mut,stdout);
 	for (gint i = 0 ; i < mut->id->len ; i  = i+ 2)
 	{

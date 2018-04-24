@@ -168,9 +168,9 @@ void milu_project_print(const Project * project, PrintMode mode, FILE * output)
     	}
     	default:
     	{
-    		fprintf(output, "Milu Project:\n");
-    		fprintf(output, "\tMutation Operators: %d\n", project->mutation_operators->len);
-    		fprintf(output, "\tMutation Locations: %d\n", project->mutation_locations->len);
+    		fprintf(output, "Milu Project:%s",CR);
+    		fprintf(output, "\tMutation Operators: %d%s", project->mutation_operators->len,CR);
+    		fprintf(output, "\tMutation Locations: %d%s", project->mutation_locations->len,CR);
     		break;
     	}
     }
@@ -279,7 +279,7 @@ void milu_project_save_mid(Project * project, GPtrArray * mutants)
     {
     	Mutant * m = g_ptr_array_index(mutants, i);
     	mutation_id_print(m->id, findex);
-    	fprintf(findex, "%s", "\n");
+    	fprintf(findex, "%s", CR);
     }
     fclose(findex);	
     g_string_free(cmd, TRUE);
@@ -323,8 +323,8 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 		{
 			mutant_save_html(curr_mut);
 			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
-			//fprintf(fmut_list, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
-			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html\" class=\"mut_code\">Mut %d</a><br />",i+1, i);
+			//fprintf(fmut_list, "<a href=\"%s/mut.html#mut\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
+			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html#mut\" class=\"mut_code\">Mut %d</a><br />",i+1, i+1);
 		}
 		else
 		{
@@ -332,8 +332,8 @@ void milu_project_save_html_output(Project * project, GPtrArray * mutants)
 		{
 			mutant_save_html(curr_mut);
 			gchar * mut_name = ASTUnit_get_file_name(ASTUnit_get_current());
-			//fprintf(fmut_list, "<a href=\"%s/mut.html\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
-			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html\" class=\"mut_code\">Mut %d</a><br />",i+1, i);
+			//fprintf(fmut_list, "<a href=\"%s/mut.html#mut\" class=\"mut_code\">Mut %d</a><br />",curr_mut->html_path, i);
+			fprintf(fmut_list, "<a href=\"../mutants/%d/html/mut.html#mut\" class=\"mut_code\">Mut %d</a><br />",i+1, i+1);
 		}
 		}
 

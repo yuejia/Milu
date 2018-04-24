@@ -37,7 +37,7 @@ static gboolean mutator_milu_break_continue_replacement_mutate(ASTNode * node, g
 
 Mutator * mutator_milu_break_continue_replacement()
 {
-	Mutator * mut = mutator_new("float constant replace operator", "");
+	Mutator * mut = mutator_new("break continue replacement", "");
 	mut->node_checking = & mutator_milu_break_statement_node_checking;
 	mut->mutate = & mutator_milu_break_continue_replacement_mutate;
 	mut->clean = & mutator_milu_break_continue_replacement_clean;
@@ -48,7 +48,23 @@ Mutator * mutator_milu_break_continue_replacement()
 static gboolean mutator_milu_break_statement_node_checking(ASTNode * node)
 {
 	if(node->kind == NodeKind_BreakStmt)
-		return TRUE;
+	{
+		// allow replacement of break inside loop only
+		ASTNode* parent = node->parent;
+		while (parent != NULL) {
+			if (parent->kind == NodeKind_SwitchStmt) {
+				// break belongs to switch-statement,
+				// do not replace break-statement
+				return FALSE;
+			}
+			if (parent->kind == NodeKind_ForStmt || parent->kind == NodeKind_WhileStmt || parent->kind == NodeKind_DoStmt) {
+				// break inside a loop
+				// replace break-statement with continue-statement
+				return TRUE;
+			}
+			parent = parent->parent;
+		}
+	}
 	return FALSE;
 }
 

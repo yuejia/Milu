@@ -129,7 +129,7 @@ void milu_options_parse(int argc, char *argv[ ])
 	g_option_context_add_main_entries (context, entries, NULL);
 	if (!g_option_context_parse (context, &argc, &argv, &error))
 	{
-		g_log ("Milu",G_LOG_LEVEL_WARNING,"Show all help options: milu --help\n") ;
+		g_log ("Milu",G_LOG_LEVEL_WARNING,"Show all help options: milu --help%s",CR) ;
 		exit(1);
 	}
 

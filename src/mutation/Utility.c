@@ -69,7 +69,7 @@ GPtrArray * milu_utility_load_text_file_to_gptrarray(const gchar * path)
 	{
 		g_log ("Milu",G_LOG_LEVEL_ERROR,"Cannot load the inputs file. %s", path) ;
 	}
-	gchar ** inputs  = g_strsplit (contents, "\n", -1);
+	gchar ** inputs  = g_strsplit (contents, CR, -1);
 	gchar ** curr_input = inputs;
     while(*curr_input)
     {

@@ -34,9 +34,9 @@ static gboolean mutator_milu_statement_node_checking(ASTNode * node);
 static gboolean mutator_milu_statement_deletion_clean(ASTNode * node, gint type);
 static gboolean mutator_milu_statement_deletion_mutate(ASTNode * node, gint type);
 
-Mutator * mutator_milu_statement_deletion()
+Mutator * mutator_milu_statement_deletion0()
 {
-	Mutator * mut = mutator_new("Statement deletion", "");
+	Mutator * mut = mutator_new("Statement deletion 0", "");
 	mut->node_checking = & mutator_milu_statement_node_checking;
 	mut->mutate = & mutator_milu_statement_deletion_mutate;
 	mut->clean = & mutator_milu_statement_deletion_clean;
@@ -48,42 +48,44 @@ static gboolean mutator_milu_statement_node_checking(ASTNode * node)
 {
 	if (node->parent==NULL)
 		return FALSE;
-	if (node->parent->kind==NULL)
-		return FALSE;
 
 	if(node->parent->kind == NodeKind_CompoundStmt)
 		return TRUE;
-/*
-    else if(node->parent->kind == NodeKind_IfStmt || ASTNode_get_nth_child(node->parent,2) == node)
-		return TRUE;
-            todo: need to add the following cases below
-            node->parent->kink == NodeKind_WhileStmt ||
-            node->parent->kink == NodeKind_DoStmt ||
-            node->parent->kink == NodeKind_ForStmt  
-*/
+
 	return FALSE;
 }
 
 static gboolean mutator_milu_statement_deletion_mutate(ASTNode * node, gint type)
 {
-	ASTNodeType_save_original_kind(node);
-	ASTNodeType_save_original_text(node);
-	switch(type)
-	{
-		case 1:
-			set_ASTNode_kind(node, NodeKind_MiluSource);
-			set_ASTNode_text(node, "");
-			return TRUE;
-		default:
-			break;
-	}
-	return FALSE;
+	if (type != 1)
+		return FALSE;
+
+	// semantically delete statement
+	// if (0) statement
+	ASTNode* expr = ASTNode_new_integer_literal_node("0");
+	ASTNode* comp = ASTNode_new_comp_stmt_node();
+	ASTNode* if_stmt = ASTNode_new_if_node(expr, comp);
+
+	ASTNode_replace(node, if_stmt);
+
+	node->next_sibling = NULL;
+	node->prev_sibling = NULL;
+	ASTNode_append_child(comp, node);
+
+	return TRUE;
 }
 
 static gboolean mutator_milu_statement_deletion_clean(ASTNode * node, gint type)
 {
-	ASTNodeType_restore_original_kind(node);
-	ASTNodeType_restore_original_text(node);
+	ASTNode* if_stmt = node->parent->parent;
+
+	ASTNode_unlink(node);
+	ASTNode_replace(if_stmt, node);
+
+	if_stmt->next_sibling = NULL;
+	if_stmt->prev_sibling = NULL;
+	ASTNode_free_tree(if_stmt);
+
 	return TRUE;
 }
 

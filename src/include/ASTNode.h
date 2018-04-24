@@ -299,6 +299,17 @@ enum ASTNodeKind {
   NodeKind_AnnotateAttr                  = 406,
   NodeKind_LastAttr                      = NodeKind_AnnotateAttr,
   NodeKind_AsmLabelAttr						= 407,
+  NodeKind_PackedAttr = 408,
+  NodeKind_PureAttr = 409,
+  NodeKind_ConstAttr = 410,
+  NodeKind_NoDuplicateAttr = 411,
+  NodeKind_CUDAConstantAttr = 412,
+  NodeKind_CUDADeviceAttr = 413,
+  NodeKind_CUDAGlobalAttr = 414,
+  NodeKind_CUDAHostAttr = 415,
+  NodeKind_CUDASharedAttr = 416,
+  NodeKind_VisibilityAttr = 417,
+
   /* Preprocessing */
   NodeKind_PreprocessingDirective        = 500,
   NodeKind_MacroDefinition               = 501,
@@ -388,6 +399,14 @@ ASTNode * ASTNode_new(NodeKind type, gchar * text, gpointer cx);
 void ASTNode_free(ASTNode * node);
 
 /**
+ * \brief Free the given ASTNode including all children.
+ *
+ * \param node The give ASTNode.
+ *
+ **/
+void ASTNode_free_tree(ASTNode * node);
+
+/**
  * \Define the a hook function pointer for traversing AST.
  */
 typedef gboolean (*ASTNodeTraverseFunc) (ASTNode * node, gpointer data);
@@ -470,6 +489,15 @@ ASTNode * ASTNode_search_node_by_cx(ASTNode * parent, gpointer cx);
  */
 gboolean parse_tree_node_traverse_pre_order (ASTNode * node, ASTNodeTraverseFunc func, gpointer data);
 
+/**
+ *  \brief Interface to traverse the abstract syntax tree.
+ *
+ *  \param node The root of the tree.
+ *  \param func The hook function to call when traversing the nodes.
+ *  \param data The user defined data.
+ *
+ */
+gboolean parse_tree_node_traverse_post_order (ASTNode * node, ASTNodeTraverseFunc func, gpointer data);
 /**
  * \brief Create a new ASTNodeType.
  *

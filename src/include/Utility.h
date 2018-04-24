@@ -129,5 +129,18 @@ void  milu_utility_append_gptrarray(GPtrArray * gp_a, GPtrArray * gp_b );
  **/
 GString * milu_utility_source_to_html(GString * src);
 
+#if OPSYS == Windows
+	#define CR "\r\n"
+#elif Linux
+	#define CR "\n"
+#elif MacOS
+	#define CR "\r"
+#endif
+
+#ifndef CR
+	#define CR "\r\n"
+#endif
+
+
 #endif /* UTILITY_H_ */
 /**@}*/

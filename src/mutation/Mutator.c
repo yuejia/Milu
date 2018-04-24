@@ -51,8 +51,8 @@ void mutators_print(GPtrArray * muts, FILE * output)
 }
 void mutator_print(Mutator * mut, FILE * output)
 {
-	g_fprintf(output, "Name: %s\n", mut->name);
-	g_fprintf(output, "Info: %s\n\n", mut->info);
+	g_fprintf(output, "Name: %s%s", mut->name,CR);
+	g_fprintf(output, "Info: %s", mut->info,CR,CR);
 }
 
 extern gint CURR_SAVING_MUT;

@@ -27,6 +27,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "Utility.h"
 #include "ASTNode.h"
 
 // Private function interface
@@ -83,11 +84,11 @@ static int check_milu_source_node_lines(ASTNode * node)
 {
 	char * curr_pos = node->text;
 	int i = 0;
-	while(strstr (curr_pos,"\n"))
+	while(strstr (curr_pos, CR))
 	{
 		i++;
-		curr_pos = strstr (curr_pos,"\n") + 1;
-	//	printf("%s\n", curr_pos );
+		curr_pos = strstr (curr_pos, CR) + 1;
+	//	printf("%s%s", curr_pos, CR );
 	}
 	return i;
 }
@@ -99,10 +100,10 @@ void ASTNode_print_dot(ASTNode * node, FILE * output)
 
 	GString * mem_print = g_string_sized_new((gsize)102400);
 
-	g_string_append_printf(mem_print,"%s","digraph G{ \n");
+	g_string_append_printf(mem_print,"%s%s","digraph G{ ", CR);
 	parse_tree_node_traverse_pre_order (node, &print_dot_label, (gpointer) mem_print);
 	parse_tree_node_traverse_pre_order (node, &print_dot_connection, (gpointer) mem_print);
-	g_string_append_printf(mem_print,"%s","}\n");
+	g_string_append_printf(mem_print,"%s}",CR);
 	g_fprintf(output,"%s",mem_print->str);
 	g_string_free(mem_print,TRUE);
 }
@@ -143,7 +144,7 @@ void ASTNode_print_source(ASTNode* parent, FILE * output)
 		case NodeKind_VarDecl:
 		{
 			print_source_var_decl(node, mem_print, 0);
-			g_string_append_printf(mem_print,";\n");
+			g_string_append_printf(mem_print,";%s",CR);
 			html_lines++;
             break;
 		}
@@ -151,19 +152,24 @@ void ASTNode_print_source(ASTNode* parent, FILE * output)
 		{
 			if(node->text[0] == '#')
 			{
-				g_string_append_printf(mem_print,"%s \n", node->text);
+				g_string_append_printf(mem_print,"%s %s", node->text,CR);
 			}
 			else
-			g_string_append_printf(mem_print,"%s ;\n", node->text);
+			g_string_append_printf(mem_print,"%s ;%s", node->text,CR);
+
 		//	printf("%s",node->text);
 			html_lines++;
             break;
 		}
 		default:
-			g_string_append_printf(mem_print,"****%s ;\n", node->text);
+			g_string_append_printf(mem_print,"****%s ;%s", node->text,CR);
 			break;
 
 		}
+
+		/*if (strstr(mem_print->str, "ulonglong")!=NULL)
+			printf("%d", node->kind);*/
+
 		node = node->next_sibling;
 	}
 	g_fprintf(output,"%s",mem_print->str);
@@ -209,13 +215,13 @@ void ASTNode_print_html(ASTNode* parent, FILE * output)
 		case NodeKind_VarDecl:
 		{
 			print_source_var_decl(node, mem_print, 0);
-			g_string_append_printf(mem_print,";\n");
+			g_string_append_printf(mem_print,";%s",CR);
 			html_lines++;
             break;
 		}
 		case NodeKind_MiluSource:
 		{
-			g_string_append_printf(mem_print,"%s ;\n", node->text);
+			g_string_append_printf(mem_print,"%s ;%s", node->text,CR);
 			html_lines += check_milu_source_node_lines(node)+1;
             break;
 		}
@@ -240,7 +246,7 @@ void ASTNode_print_html(ASTNode* parent, FILE * output)
 
             if(flag && html_check_mutantion_lines(cline))
             {
-                mem_print = g_string_insert (mem_print, i, "</div><br /><div class=\"mut\">");
+                mem_print = g_string_insert (mem_print, i, "</div><a name=\"mut\">&nbsp;</a><br /><div class=\"mut\">");
             }
             else if(flag)
             {
@@ -251,7 +257,7 @@ void ASTNode_print_html(ASTNode* parent, FILE * output)
             else if (html_check_mutantion_lines(cline))
             {
                    flag = TRUE;
-                   mem_print =  g_string_insert (mem_print, i, "<br /><div class=\"mut\">");
+                   mem_print =  g_string_insert (mem_print, i, "<a name=\"mut\">&nbsp;</a> <br /><div class=\"mut\">");
             }
             else
             {
@@ -302,14 +308,14 @@ static gboolean print_dot_label(ASTNode * node,gpointer data)
 	{
 		if (node->type->kind != NodeTypeKind_Unexposed)
 		{
-			g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:%s\"];\n",node->id, ASTNodeKindNames[node->kind], node->text, ASTNodeTypeKindNames[node->type->kind] );
+			g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:%s\"];%s",node->id, ASTNodeKindNames[node->kind], node->text, ASTNodeTypeKindNames[node->type->kind],CR );
 		}
 		else
 		{
             if(node->type->node)
-			g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:%s\"];\n",node->id, ASTNodeKindNames[node->kind], node->text, node->type->node->text );
+			g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:%s\"];%s",node->id, ASTNodeKindNames[node->kind], node->text, node->type->node->text,CR );
             else
-			g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:unknown\"];\n",node->id, ASTNodeKindNames[node->kind], node->text);
+			g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:unknown\"];%s",node->id, ASTNodeKindNames[node->kind], node->text,CR);
 
 		}
 			html_lines++;
@@ -318,7 +324,7 @@ static gboolean print_dot_label(ASTNode * node,gpointer data)
 
 	case NodeKind_FunctionDecl:
 	{
-		g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:%s\"];\n",node->id, ASTNodeKindNames[node->kind], node->text, ASTNodeTypeKindNames[node->type->kind] );
+		g_string_append_printf((GString *) data,"%lu [label=\"%s:%s, type:%s\"];%s",node->id, ASTNodeKindNames[node->kind], node->text, ASTNodeTypeKindNames[node->type->kind],CR );
 		html_lines++;
 		break;
 	}
@@ -329,7 +335,7 @@ static gboolean print_dot_label(ASTNode * node,gpointer data)
 	default:
 	{
 
-		g_string_append_printf((GString *) data,"%lu [label=\"%s:%.8s\"];\n",node->id, ASTNodeKindNames[node->kind], node->text);
+		g_string_append_printf((GString *) data,"%lu [label=\"%s:%.8s\"];%s",node->id, ASTNodeKindNames[node->kind], node->text,CR);
 		html_lines++;
 		break;
 	}
@@ -337,16 +343,16 @@ static gboolean print_dot_label(ASTNode * node,gpointer data)
 	/*
 	if(pnode->type != MILU_STRING_LITERAL)
 	{
-		g_string_append_printf((GString *) data,"%d [label=\"%s\"];\n",pnode->id,"String Literal");
+		g_string_append_printf((GString *) data,"%d [label=\"%s\"];%s",pnode->id,"String Literal",CR);
 	}
 	if (is_token_node(pnode))
 	{
-//		g_string_append_printf((GString *) data,"%d [label=\"%d\"];\n",pnode->id,pnode->type);
-		g_string_append_printf((GString *) data,"%d [label=\"%d\"];\n",pnode->id,pnode->text);
+//		g_string_append_printf((GString *) data,"%d [label=\"%d\"];%s",pnode->id,pnode->type,CR);
+		g_string_append_printf((GString *) data,"%d [label=\"%d\"];%s",pnode->id,pnode->text,CR);
 	}
 	else if(pnode->type != MILU_STRING_LITERAL)
 	{
-		g_string_append_printf((GString *) data,"%d [label=\"%s\"];\n",pnode->id,pnode->text->str);
+		g_string_append_printf((GString *) data,"%d [label=\"%s\"];%s",pnode->id,pnode->text->str,CR);
 	}
 		*/
 	return FALSE;
@@ -360,7 +366,7 @@ static gboolean print_dot_connection(ASTNode * node,gpointer data)
 	{
 		g_string_append_printf((GString *) data,"%lu", node->id);
 		g_string_append_printf((GString *) data,"->");
-		g_string_append_printf((GString *) data,"%lu\n",curr_node->id);
+		g_string_append_printf((GString *) data,"%lu%s",curr_node->id,CR);
 		html_lines++;
 		curr_node = curr_node->next_sibling;
 	}
@@ -383,86 +389,34 @@ static void print_source_parm_decl(ASTNode * parent, GString * buffer)
     html_check_mutantion_node(parent);
 	ASTNode * node = parent->children;
 
-	if(ASTNode_is_const(parent))
-		g_string_append_printf(buffer,"const ",   parent->text);
-
-	if(parent->type->kind == NodeTypeKind_Pointer)
-	{
-		if(node->text[1] != '*')
-		{
-			g_string_append_printf(buffer,"%s %s ",  node->text,  parent->text);
-		}
-		else
-		{
-				if(node->next_sibling && g_strcmp0(node->next_sibling->text, "va_list") == 0)
-				{
-					g_string_append_printf(buffer,"va_list %s ", parent->text);
-					node= node->next_sibling;
-				}
-            else
-            {
-			print_source_type_ref(node->next_sibling, buffer);
-			g_string_append_printf(buffer,"%s %s ",  node->text,  parent->text);
-			node= node->next_sibling;
-
-            }
-		}
+	if (parent->type->kind == NodeTypeKind_Unexposed &&
+			node != NULL && node->kind == NodeKind_MiluSource) {
+		g_string_append(buffer, node->text);
+		return;
 	}
-		else if(parent->type->kind == NodeTypeKind_Typedef)
-		{
-			print_source_type_ref(node, buffer);
-			g_string_append_printf(buffer,"%s ",  parent->text);
-			node = node->next_sibling;
-		}
-		else g_string_append_printf(buffer,"%s %s ",  ASTNodeTypeKindNames[parent->type->kind],  parent->text);
+
+	// should not reach here!
+	g_string_append_printf(buffer,"%s %s ",  ASTNodeTypeKindNames[parent->type->kind],  parent->text);
 }
 
 static void print_source_init_list_expr(ASTNode * node, GString * buffer)
 {
-
 	ASTNode * children = node->children;
 
 	g_string_append_printf(buffer,"{ ");
+
 	while(children)
 	{
-		switch(children->kind)
-		{
-		case NodeKind_IntegerLiteral:
-		{
-			print_source_integer_literal(children, buffer);
-			if(children->next_sibling)
+		print_source_expr(children, buffer, FALSE);
+
+		if(children->next_sibling) {
 			g_string_append_printf(buffer,", ");
-			break;
 		}
-		case NodeKind_UnaryOperator:
-		{
-			print_source_unary_operator(children, buffer,0);
-			if(children->next_sibling)
-			g_string_append_printf(buffer,", ");
-			break;
-		}
-		case NodeKind_FloatingLiteral:
-		{
-			print_source_float_literal(children, buffer);
-			if(children->next_sibling)
-			g_string_append_printf(buffer,", ");
-			break;
-		}
-		case NodeKind_UnexposedExpr:
-		{
-			print_source_unexposed_expr(children, buffer);
-			if(children->next_sibling)
-			g_string_append_printf(buffer,", ");
-			break;
-		}
-		default:
-			break;
-		}
+
 		children = children->next_sibling;
+	}
 
-		}
-			g_string_append_printf(buffer,"} ");
-
+	g_string_append_printf(buffer,"} ");
 }
 
 static void	print_source_var_decl(ASTNode * parent, GString * buffer, gboolean notype)
@@ -485,205 +439,90 @@ static void	print_source_var_decl(ASTNode * parent, GString * buffer, gboolean n
     if(ASTNode_is_static(parent))
     {
         g_string_append_printf(buffer,"static ",   parent->text);
-        //	printf("-----------%s\n", parent->text);
     }
 
-    if(notype)
-    {
-//        printf("no type\n");
-        if(parent->type->kind == NodeTypeKind_ConstantArray)
-        {
-            g_string_append_printf(buffer,"%s ",   parent->text);
+	if(parent->type->kind == NodeTypeKind_ConstantArray)
+	{
+		// leading type
+		if (!notype) {
+			g_string_append_printf(buffer,"%s ",  parent->type->text);
+		}
 
-            while (node->kind == NodeKind_TypeRef)
-            {
-                node = node->next_sibling	;
-            }
+		// variable name
+		g_string_append_printf(buffer,"%s ",  parent->text);
 
-            if(node->kind != NodeKind_InitListExpr  && node->kind!=NodeKind_IntegerLiteral)
-            {
-                g_string_append_printf(buffer,"[ ]");
-            }
-            else
-            {
-                g_string_append_printf(buffer,"[ ");
-                print_source_integer_literal(node, buffer);
-                g_string_append_printf(buffer,"] ");
-                node = node->next_sibling;
-            }
+		// skip array element type (already handled in parent->type->text)
+		node = node->next_sibling;
 
+		// array size(s)
+		while (node != NULL && node->kind != NodeKind_InitListExpr) {
+			g_string_append_printf(buffer,"[");
+			print_source_expr(node, buffer, FALSE);
+			g_string_append_printf(buffer,"]");
 
-            while(node)
-            {
-                switch(node->kind)
-                {
-                    /*
-                       case NodeKind_IntegerLiteral:
-                       {
-                       g_string_append_printf(buffer,"[ ");
-                       print_source_integer_literal(node, buffer);
-                       g_string_append_printf(buffer,"] ");
-                       break;
-                       }
+			node = node->next_sibling;
+		}
 
-                     */
-                    case NodeKind_InitListExpr:
-                        {
-                            g_string_append_printf(buffer,"= ");
-                            print_source_init_list_expr(node, buffer);
-                            break;
-                        }
-                    case NodeKind_StringLiteral:
-                        {
-                            g_string_append_printf(buffer,"= ");
-                            print_source_string_literal(node, buffer);
-                            break;
-                        }
+		// optional init list expr
+		if (node != NULL && node->kind == NodeKind_InitListExpr) {
+			g_string_append_printf(buffer, " = ");
 
-                    default:
-                        break;
-                }
-                node = node->next_sibling;
-            }
-        }
-        else if(parent->type->kind == NodeTypeKind_Typedef)
-        {
-            g_string_append_printf(buffer,"%s ",  parent->text);
-            node = node->next_sibling;
-        }
-        else if(parent->type->kind == NodeTypeKind_Pointer)
-        {
-            /*
-            if(node->kind == NodeKind_MiluSource && 
-                node->next_sibling && 
-                node->next_sibling->kind == NodeKind_TypeRef)
-            {
-                g_string_append_printf(buffer,"%s * %s ", node->next_sibling->text,   parent->text);
-                node= node->next_sibling;
-            }
-            else{
-*/
-                g_string_append_printf(buffer,"* %s ", parent->text);
- //           }
-            //node= node->next_sibling;
-            node = 0;
-        }
-        else
-        {
-            g_string_append_printf(buffer,"%s ", parent->text);
-        }
+			print_source_init_list_expr(node, buffer);
 
-    }
-    else
-    {
-//        printf("not no type\n");
-        if(parent->type->kind == NodeTypeKind_ConstantArray)
-        {
-            g_string_append_printf(buffer,"%s %s ",  parent->type->text,  parent->text);
-            while (node->kind == NodeKind_TypeRef)
-            {
-                node = node->next_sibling	;
-            }
+			node = NULL;
+		}
+	}
+	else if(parent->type->kind == NodeTypeKind_Typedef)
+	{
+		if (!notype) {
+			print_source_type_ref(node, buffer);
+		}
 
-            if(node->kind == NodeKind_BinaryOperator)
-            {
-                g_string_append_printf(buffer,"[ ");
-                print_source_binary_operator(node,buffer, FALSE);
-                g_string_append_printf(buffer,"] ");
-                node = node->next_sibling;
-            }
+		g_string_append_printf(buffer,"%s ",  parent->text);
+		node = node->next_sibling;
+	}
+	else if(parent->type->kind == NodeTypeKind_Pointer)
+	{
+		// NodeKind_MiluSource
+		ASTNode* source = node;
+		node = node->next_sibling;
+		if (source->kind != NodeKind_MiluSource) {
+			g_string_append(buffer, "!Internal error: Expected NodeKind_MiluSource!");
+			return;
+		}
 
-            else if(node->kind != NodeKind_IntegerLiteral)
-            {
-                g_string_append_printf(buffer,"[ ]");
-            }
-            else
-            {
-               // printf("WWWWWWWWWWWWW");
-                g_string_append_printf(buffer,"[ ");
-                print_source_integer_literal(node, buffer);
-                g_string_append_printf(buffer,"] ");
-                node = node->next_sibling;
-            }
+		ASTNode* type = node;
+		node= node->next_sibling;
 
-            while(node)
-            {
-                switch(node->kind)
-                {
-                    /*
-                       case NodeKind_IntegerLiteral:
-                       {
-                       g_string_append_printf(buffer,"[ ");
-                       print_source_integer_literal(node, buffer);
-                       g_string_append_printf(buffer,"] ");
-                       break;
-                       }
-                     */
-                    case NodeKind_InitListExpr:
-                        {
-                            g_string_append_printf(buffer,"= ");
-                            print_source_init_list_expr(node, buffer);
-                            break;
-                        }
-                    case NodeKind_StringLiteral:
-                        {
-                            g_string_append_printf(buffer,"= ");
-                            print_source_string_literal(node, buffer);
-                            break;
-                        }
-                    default:
-                        break;
-                }
-                node = node->next_sibling;
-            }
-        }
-        else if(parent->type->kind == NodeTypeKind_Typedef)
-        {
-            print_source_type_ref(node, buffer);
-            g_string_append_printf(buffer,"%s ",  parent->text);
-            node = node->next_sibling;
-        }
-        else if(parent->type->kind == NodeTypeKind_Pointer)
-        {
-            if(node->text[1] != '*')
-            {
-                g_string_append_printf(buffer,"%s %s ",  node->text,  parent->text);
-            }
-            else
-            {
-                print_source_type_ref(node->next_sibling, buffer);
-                g_string_append_printf(buffer,"%s %s ",  node->text,  parent->text);
-                node= node->next_sibling;
-            }
-            node= node->next_sibling;
-/*
-            if(node && node->kind == NodeKind_TypeRef)
-                node= node->next_sibling;
-*/
-    
-        }
-        else if(node && node->kind == NodeKind_TypeRef)
-        {
-            print_source_type_ref(node, buffer);
-            g_string_append_printf(buffer,"%s ",  parent->text);
-            node= node->next_sibling;
-        }
-        else
-        {
-        //    if (parent->type->kind > 113)
-         //   g_string_append_printf(buffer,"%s %s ",  parent->kind->text,  parent->text);
-          //  else
-            g_string_append_printf(buffer,"%s %s ",  ASTNodeTypeKindNames[parent->type->kind],  parent->text);
-        }
+		if (!notype) {
+			print_source_type_ref(type, buffer);
+		}
 
-    }
+		g_string_append_printf(buffer, "%s ", source->text);
+		g_string_append_printf(buffer, "%s ", parent->text);
+	}
+	else if(node && node->kind == NodeKind_TypeRef)
+	{
+		if (!notype) {
+			print_source_type_ref(node, buffer);
+		}
+
+		g_string_append_printf(buffer,"%s ",  parent->text);
+		node= node->next_sibling;
+	}
+	else
+	{
+		if (!notype) {
+			g_string_append_printf(buffer,"%s ",  ASTNodeTypeKindNames[parent->type->kind]);
+		}
+		g_string_append_printf(buffer,"%s ",  parent->text);
+	}
 
 
     while(node) 
     {
         if(node->kind != NodeKind_UnexposedAttr)
             g_string_append_printf(buffer,"%s ", "=");
-
         else
             g_string_append_printf(buffer,"%s", " ");
 
@@ -742,7 +581,7 @@ static void	print_source_compound_stmt(ASTNode * parent, GString * buffer)
 {
     html_check_mutantion_node(parent);
 	ASTNode * node = parent->children;
-	g_string_append_printf(buffer,"{\n");
+	g_string_append_printf(buffer,"{%s",CR);
 	html_lines++;
 	while(node)
 	{
@@ -750,12 +589,19 @@ static void	print_source_compound_stmt(ASTNode * parent, GString * buffer)
 		node = node->next_sibling;
 	}
 	// print (
-	g_string_append_printf(buffer,"}\n");
+	g_string_append_printf(buffer,"}%s",CR);
 	html_lines++;
 }
 
 static void print_source_function_decl(ASTNode * parent, GString * buffer)
 {
+#if 0
+	if (strcmp(parent->text, "CalcEffDruStatistik") == 0) {
+		// set break point to stop when function
+		int brk = 0;
+	}
+#endif
+
     html_check_mutantion_node(parent);
 	//TODO fix type
 
@@ -765,7 +611,23 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
 	ASTNode * node = parent->children;
 	ASTNode * node_unknown_attr = NULL;
 
-	ASTNode * lastnode = ASTNode_get_nth_child(parent,ASTNode_get_children_number(parent));
+	int n = ASTNode_get_children_number(parent);
+
+	ASTNode * lastnode=NULL;
+	ASTNode * child = parent->children;
+
+	    gint curr_n = 1;
+	    while(child)
+	    {
+	        if(curr_n == n)
+	        	lastnode= child;
+
+	         child = child->next_sibling;
+	         curr_n++;
+	    }
+
+	//ASTNode * lastnode = ASTNode_get_nth_child(parent, n);
+	// ASTNode * lastnode = ASTNode_get_nth_child(parent,ASTNode_get_children_number(parent));
 
 
 	if(ASTNode_is_static(parent))
@@ -798,7 +660,7 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
 
 	if(!node)
 	{
-		g_string_append_printf(buffer,");\n");
+		g_string_append_printf(buffer,");%s",CR);
 		html_lines++;
 	}
 
@@ -817,7 +679,7 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
 			}
 			if(!node->next_sibling)
 			{
-				g_string_append_printf(buffer,");\n");
+				g_string_append_printf(buffer,");%s",CR);
 				html_lines++;
 			}
 			break;
@@ -829,7 +691,7 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
 
 			if(!node->next_sibling)
 			{
-				g_string_append_printf(buffer,");\n");
+				g_string_append_printf(buffer,");%s",CR);
 				html_lines++;
 			}
                     }
@@ -842,12 +704,12 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
                     if (lastnode->kind == NodeKind_MiluSource)
                     {
 			g_string_append_printf(buffer,", %s ", lastnode->text);
-			g_string_append_printf(buffer,")\n");
+			g_string_append_printf(buffer,")%s",CR);
 
                     }
                     else
                     {
-			g_string_append_printf(buffer,")\n");
+			g_string_append_printf(buffer,")%s",CR);
                     }
 			html_lines++;
 			print_source_compound_stmt(node, buffer);
@@ -856,7 +718,7 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
 		case NodeKind_UnexposedAttr:
 		{
 			g_string_append_printf(buffer,") ");
-			g_string_append_printf(buffer,"%s ;\n", node->children->text);
+			g_string_append_printf(buffer,"%s ;%s", node->children->text,CR);
 			html_lines++;
 			break;
 		}
@@ -867,11 +729,6 @@ static void print_source_function_decl(ASTNode * parent, GString * buffer)
 		}
 		node = node->next_sibling;
 	}
-
-
-	// print (
-
-	// print compunde stmts
 }
 
 static void	print_source_return_stmt(ASTNode * parent, GString * buffer)
@@ -905,7 +762,7 @@ static void	print_source_return_stmt(ASTNode * parent, GString * buffer)
 		node = node->next_sibling;
 	}
     */
-	g_string_append_printf(buffer,";\n");
+	g_string_append_printf(buffer,";%s",CR);
 	html_lines++;
 
 }
@@ -935,7 +792,7 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
                     {
                         if(!is_else)
                         {
-                            g_string_append_printf(buffer,")\n");
+                            g_string_append_printf(buffer,")%s",CR);
                             html_lines++;
                         }
                         print_source_binary_operator(node, buffer, TRUE);
@@ -979,7 +836,7 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
 */
 
                 default:
-                    g_printf("-:%d\n", node->kind);
+                    g_printf("-:%d%s", node->kind,CR);
                     g_assert_not_reached();
                     html_lines++;
                     break;
@@ -988,7 +845,7 @@ static void	print_source_if_stmt(ASTNode * parent, GString * buffer)
         }
         node = node->next_sibling;
     }
-    g_string_append_printf(buffer,"\n");
+    g_string_append_printf(buffer,CR);
     html_lines++;
 
 }
@@ -1069,7 +926,7 @@ static void	print_source_array_subscript_expr(ASTNode * parent, GString * buffer
                 }
 		default:
 		{
-                printf("%d --\n", node->kind);
+                printf("%d --%s", node->kind,CR);
             g_assert_not_reached();
 			break;
 		}
@@ -1090,37 +947,37 @@ static void	print_source_decl_stmt(ASTNode * parent, GString * buffer)
 	{
 		switch(node->kind)
 		{
-		case NodeKind_VarDecl:
-		{
-                        if(node == parent->children)
-			    print_source_var_decl(node, buffer, 0);
-                        else
-			    print_source_var_decl(node, buffer, 1);
-			break;
-		}
-                case NodeKind_StructDecl:
-                {
-			print_source_union_decl(node, buffer); // same as union
-			break;
-		}
+			case NodeKind_VarDecl:
+			{
+				if(node == parent->children)
+					print_source_var_decl(node, buffer, 0);
+                else
+                	print_source_var_decl(node, buffer, 1);
+				break;
+			}
 
-                case NodeKind_MiluSource:
-                {
-		        g_string_append_printf(buffer,"%s \n",  node->text);
+			case NodeKind_StructDecl:
+            {
+            	print_source_union_decl(node, buffer); // same as union
+            	break;
+            }
+
+            case NodeKind_MiluSource:
+            {
+		        g_string_append_printf(buffer,"%s %s",  node->text,CR);
 		        html_lines++;
 		        break;
-                }
+            }
+
 		default:
 			break;
-
 		}
 		node = node->next_sibling;
         if(node)
-	g_string_append_printf(buffer,", ");
+        	g_string_append_printf(buffer,", ");
 	}
-	g_string_append_printf(buffer,";\n");
+	g_string_append_printf(buffer,";%s",CR);
 	html_lines++;
-
 }
 
 
@@ -1165,7 +1022,7 @@ static void	print_source_expr(ASTNode * node, GString * buffer, gboolean is_stmt
 	}
         case NodeKind_UnexposedAttr:
         {
-		g_string_append_printf(buffer,"%s ;\n", node->children->text);
+		g_string_append_printf(buffer,"%s ;%s", node->children->text,CR);
 		html_lines++;
 		break;
         } 
@@ -1238,7 +1095,7 @@ static void	print_source_expr(ASTNode * node, GString * buffer, gboolean is_stmt
 */
 	case NodeKind_MiluSource:
 	 {
-		        g_string_append_printf(buffer,"%s \n",  node->text);
+		        g_string_append_printf(buffer,"%s %s",  node->text,CR);
 		        html_lines++;
 		        break;
 	}
@@ -1249,8 +1106,8 @@ static void	print_source_expr(ASTNode * node, GString * buffer, gboolean is_stmt
 		break;
         }
 	default:
-       g_printf("-%d %s\n", node->kind, node->text);
-        g_printf("%s \n", buffer->str);
+       g_printf("-%d %s%s", node->kind, node->text,CR);
+        g_printf("%s %s", buffer->str,CR);
         g_assert_not_reached();
 		break;
 	}
@@ -1275,7 +1132,7 @@ static void	print_source_binary_operator(ASTNode * parent, GString * buffer, gbo
             && parent->parent->kind != NodeKind_ConditionalOperator
             && is_stmt)
 	{
-		g_string_append_printf(buffer,";\n");
+		g_string_append_printf(buffer,";%s",CR);
 		html_lines++;
 	}
 }
@@ -1295,7 +1152,7 @@ static void	print_source_unary_operator(ASTNode * parent, GString * buffer, gboo
 	//TODO fix other statement
 	if(parent->parent->kind != NodeKind_BinaryOperator && is_stmt)
 	{
-		g_string_append_printf(buffer,";\n");
+		g_string_append_printf(buffer,";%s",CR);
 		html_lines++;
 	}
 }
@@ -1314,7 +1171,7 @@ static void	print_source_unary_operator_append(ASTNode * parent, GString * buffe
 	//TODO fix other statement
 	if(parent->parent->kind != NodeKind_BinaryOperator && is_stmt)
 	{
-		g_string_append_printf(buffer,";\n");
+		g_string_append_printf(buffer,";%s",CR);
 		html_lines++;
 	}
 }
@@ -1345,7 +1202,7 @@ static void	print_source_conditional_operator(ASTNode * parent, GString * buffer
 	//TODO fix other statement
 	if(parent->parent->kind != NodeKind_BinaryOperator && is_stmt)
 	{
-		g_string_append_printf(buffer,";\n");
+		g_string_append_printf(buffer,";%s",CR);
 		html_lines++;
 	}
 }
@@ -1358,7 +1215,7 @@ static void print_source_typedef_decl(ASTNode * parent, GString * buffer)
     {
         if(children->kind == NodeKind_MiluSource)
         {
-	        g_string_append_printf(buffer,"%s \n",  children->text);
+	        g_string_append_printf(buffer,"%s %s",  children->text,CR);
 	        html_lines++;
         }
         children = children->next_sibling;
@@ -1373,7 +1230,7 @@ static void print_source_union_decl(ASTNode * parent, GString * buffer)
     {
         if(children->kind == NodeKind_MiluSource)
         {
-	        g_string_append_printf(buffer,"%s \n",  children->text);
+	        g_string_append_printf(buffer,"%s %s",  children->text,CR);
 	        html_lines++;
         }
         children = children->next_sibling;
@@ -1403,7 +1260,7 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		case NodeKind_CallExpr:
 		{
 			print_source_call_expr(node,buffer);
-	        g_string_append_printf(buffer,";\n");
+	        g_string_append_printf(buffer,";%s",CR);
 	        html_lines++;
             break;
 		}
@@ -1423,13 +1280,13 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		}
 		case NodeKind_BreakStmt:
 		{
-			g_string_append_printf(buffer,"%s ;\n", "break");
+			g_string_append_printf(buffer,"%s ;%s", "break",CR);
 			html_lines++;
             break;
 		}
 		case NodeKind_ContinueStmt:
 		{
-			g_string_append_printf(buffer,"%s ;\n", "continue");
+			g_string_append_printf(buffer,"%s ;%s", "continue",CR);
 			html_lines++;
             break;
 		}
@@ -1455,13 +1312,13 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		}
 		case NodeKind_MiluSource:
 		{
-			g_string_append_printf(buffer,"%s ;\n", node->text);
+			g_string_append_printf(buffer,"%s ;%s", node->text,CR);
 			html_lines++;
             break;
 		}
 		case NodeKind_NullStmt:
 		{
-			g_string_append_printf(buffer,";\n");
+			g_string_append_printf(buffer,";%s",CR);
 			html_lines++;
             break;
 		}
@@ -1483,7 +1340,7 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		case NodeKind_ParenExpr:
 		{
 			print_source_paren_stmt(node,buffer);
-			g_string_append_printf(buffer,";\n");
+			g_string_append_printf(buffer,";%s",CR);
 						html_lines++;
 			break;
 		}
@@ -1491,13 +1348,13 @@ static void	print_source_stmt(ASTNode * node, GString * buffer)
 		{
 
 			//TODO : fix for asm
-			g_string_append_printf(buffer,";\n");
+			g_string_append_printf(buffer,";%s",CR);
 			html_lines++;
             break;
 
 		}
 		default:
-			g_printf("--%d\n", node->kind);
+			g_printf("--%d%s", node->kind,CR);
 			html_lines++;
 			g_assert_not_reached();
 			break;
@@ -1513,12 +1370,12 @@ static void	print_source_switch_stmt(ASTNode * parent, GString * buffer)
 	print_source_expr(node, buffer, 0);
 
 	    node=node->next_sibling;
-		g_string_append_printf(buffer,")\n");
+		g_string_append_printf(buffer,")%s",CR);
 		html_lines++;
 
     print_source_stmt(node, buffer);
 
-	g_string_append_printf(buffer,"\n");
+	g_string_append_printf(buffer,CR);
     html_lines++;
 
 }
@@ -1533,14 +1390,14 @@ static void	print_source_do_stmt(ASTNode * parent, GString * buffer)
 
     print_source_stmt(node, buffer);
 
-	//g_string_append_printf(buffer,"\n");
+	//g_string_append_printf(buffer,CR);
 	//html_lines++;
 
     node=node->next_sibling;
 
     g_string_append_printf(buffer,"while( ");
     print_source_expr(node, buffer,0);
-	g_string_append_printf(buffer,");\n");
+	g_string_append_printf(buffer,");%s",CR);
     html_lines++;
 }
 
@@ -1552,12 +1409,12 @@ static void	print_source_while_stmt(ASTNode * parent, GString * buffer)
     print_source_expr(node, buffer, 0);
 
     node=node->next_sibling;
-	g_string_append_printf(buffer,")\n");
+	g_string_append_printf(buffer,")%s",CR);
 	html_lines++;
 
     print_source_stmt(node, buffer);
 
-	g_string_append_printf(buffer,"\n");
+	g_string_append_printf(buffer,CR);
     html_lines++;
 
 }
@@ -1570,12 +1427,12 @@ static void	print_source_for_stmt(ASTNode * parent, GString * buffer)
 //deal with for (;;)
 if(ASTNode_get_children_number(parent) == 1 && node->kind == NodeKind_CompoundStmt)
 {
-	g_string_append_printf(buffer,"; ; ) \n");
+	g_string_append_printf(buffer,"; ; ) %s",CR);
 	html_lines++;
 
         print_source_stmt(node, buffer);
 
-	g_string_append_printf(buffer,"\n");
+	g_string_append_printf(buffer,CR);
          html_lines++;
         return;
 }
@@ -1609,12 +1466,12 @@ else
     print_source_expr(node, buffer, 0);
 
     node=node->next_sibling;
-	g_string_append_printf(buffer,")\n");
+	g_string_append_printf(buffer,")%s",CR);
 	html_lines++;
 
     print_source_stmt(node, buffer);
 
-	g_string_append_printf(buffer,"\n");
+	g_string_append_printf(buffer,CR);
     html_lines++;
 
 }
@@ -1625,7 +1482,7 @@ static void	print_source_goto_stmt(ASTNode * parent, GString * buffer)
 	ASTNode * node = parent->children;
 	g_string_append_printf(buffer,"goto ");
     print_source_expr(node, buffer, 0);
-	g_string_append_printf(buffer,";\n");
+	g_string_append_printf(buffer,";%s",CR);
     html_lines++;
 }
 
@@ -1633,7 +1490,7 @@ static void	print_source_default_stmt(ASTNode * parent, GString * buffer)
 {
     html_check_mutantion_node(parent);
 	ASTNode * node = parent->children;
-	g_string_append_printf(buffer,"%s :\n", " default");
+	g_string_append_printf(buffer,"%s :%s", " default",CR);
     html_lines++;
     print_source_stmt(node, buffer);
 }
@@ -1644,7 +1501,7 @@ static void	print_source_case_stmt(ASTNode * parent, GString * buffer)
 	ASTNode * node = parent->children;
 	g_string_append_printf(buffer,"%s ", "case");
     print_source_expr(node, buffer, 0);
-	g_string_append_printf(buffer,": %s", "\n");
+	g_string_append_printf(buffer,": %s", CR);
     html_lines++;
     print_source_stmt(node->next_sibling, buffer);
 }
@@ -1655,7 +1512,7 @@ static void	print_source_label_stmt(ASTNode * parent, GString * buffer)
 	ASTNode * node = parent->children;
 	g_string_append_printf(buffer,"%s :", parent->text);
     print_source_stmt(node, buffer);
-//	g_string_append_printf(buffer,";\n");
+//	g_string_append_printf(buffer,";%s",CR);
 //    html_lines++;
 
 }
@@ -1705,7 +1562,7 @@ static void print_source_cstyle_cast_expr(ASTNode * parent, GString * buffer, gb
 
 	if(is_stmt)
 	{
-		g_string_append_printf(buffer,";\n");
+		g_string_append_printf(buffer,";%s",CR);
 	    html_lines++;
 	}
 
@@ -1742,7 +1599,7 @@ static void html_check_mutantion_node(ASTNode * node)
     }
     else
     {
-    g_printf("Invalid node when producing html\n"	);
+    g_printf("Invalid node when producing html%s",CR	);
     }
 }
 
