@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Utility.h"
 #include "ASTNode.h"
+#include "ASTNodeUtil.h"
 
 // Private function interface
 

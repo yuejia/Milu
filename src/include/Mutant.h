@@ -153,6 +153,7 @@ void mutants_free(GPtrArray * mutants);
 
 
 gboolean mutant_check_compiled(Mutant * mut);
+gboolean mutant_check_duplication(Mutant * curr_mut, Mutant * next_mut);
 gboolean mutant_check_equivalence(Mutant * mut, Mutant * std);
 void mutants_check_compiled(GPtrArray * muts);
 void mutants_append_mutants(GPtrArray * mutantsA, GPtrArray * mutantsB);
