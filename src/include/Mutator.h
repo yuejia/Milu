@@ -230,6 +230,7 @@ Mutator * mutator_austin_milu_or_logical_negation();
 Mutator * mutator_austin_milu_integer_constant_replacement();
 
 Mutator * mutator_milu_statement_deletion();
+Mutator * mutator_milu_statement_deletion0();
 
 #endif /* MUTATOR_H_ */
 /**@}*/
